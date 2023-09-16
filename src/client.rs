@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use eyre::WrapErr;
 use serde::Serialize;
 // use serde_json::to_string;
@@ -42,16 +44,45 @@ impl Client {
         self.client.play().map_err(|e| eyre::eyre!(e))
     }
 
-    pub(crate) fn next(&mut self) -> Result<(), eyre::Error> {
+    pub fn next(&mut self) -> Result<(), eyre::Error> {
         self.client.next().map_err(|e| eyre::eyre!(e))
     }
 
-    pub(crate) fn prev(&mut self) -> Result<(), eyre::Error> {
+    pub fn prev(&mut self) -> Result<(), eyre::Error> {
         self.client.prev().map_err(|e| eyre::eyre!(e))
     }
 
     pub fn pause(&mut self) -> eyre::Result<()> {
         self.client.pause(true).map_err(|e| eyre::eyre!(e))
+    }
+
+    pub fn pause_if_playing(&mut self) -> Result<(), eyre::Error> {
+        match self.client.status()?.state {
+            mpd::State::Play => {
+                self.pause()?;
+                Ok(())
+            }
+            mpd::State::Pause => Err(eyre::eyre!("")),
+            mpd::State::Stop => Err(eyre::eyre!("")),
+        }
+    }
+
+    pub fn cdprev(&mut self) -> Result<(), eyre::Error> {
+        let default_duration = Duration::from_secs(0);
+        let status = &self.client.status()?;
+        let current = status.elapsed.unwrap_or(default_duration).as_secs();
+
+        if current < 3 {
+            self.prev()?;
+        } else {
+            let place = match status.song {
+                Some(ref song) => song.pos,
+                None => 0,
+            };
+            self.client.seek(place, 0)?;
+        }
+
+        Ok(())
     }
 
     pub fn toggle(&mut self) -> eyre::Result<()> {
@@ -72,11 +103,11 @@ impl Client {
     // playlist related commands
     //
 
-    pub(crate) fn clear(&mut self) -> Result<(), eyre::Error> {
+    pub fn clear(&mut self) -> Result<(), eyre::Error> {
         self.client.clear().map_err(|e| eyre::eyre!(e))
     }
 
-    pub(crate) fn queued(&mut self) -> Result<(), eyre::Error> {
+    pub fn queued(&mut self) -> Result<(), eyre::Error> {
         if let Some(song) =
             self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
         {
