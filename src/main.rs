@@ -38,7 +38,7 @@ fn main() {
             args::OutputFormat::Json => {
                 println!("{}", serde_json::to_string(&status).unwrap())
             }
-            args::OutputFormat::Txt => println!("{}", status),
+            args::OutputFormat::Text => println!("{}", status),
         })
     }) {
         handle_error(e);
