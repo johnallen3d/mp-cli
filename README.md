@@ -1,20 +1,20 @@
-# mpc-rs
+# mp-cli
 
 A Music Player Daemon (MPD) CLI client implemented in Rust.
 
 ## Features
 
 - Playback control: `play`/`pause`, `toggle` etc.
-- Volume adjustment: `volume 50`, `volume +10`, `volume -- -10` ([issue](https://github.com/johnallen3d/mpc-rs/issues/1))
+- Volume adjustment: `volume 50`, `volume +10`, `volume -- -10` ([issue](https://github.com/johnallen3d/mp-cli/issues/1))
 - Status: `status`
 
 ### Full Help
 
 ```bash
-❯ mpc-rs help
+❯ mp-cli help
 Music Player Daemon client written in Rust
 
-Usage: mpc-rs [OPTIONS] [COMMAND]
+Usage: mp-cli [OPTIONS] [COMMAND]
 
 Commands:
   play    Start the player
@@ -45,8 +45,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 Then use `cargo` to build and install locally.
 
 ```bash
-git clone https://github.com/johnallen3d/mpc-rs.git
-cd mpc-rs
+git clone https://github.com/johnallen3d/mp-cli.git
+cd mp-cli
 cargo install --path .
 ```
 
@@ -57,7 +57,7 @@ Mostly because I wanted to practice writing Rust. Also, for use with the wonderf
 With this in mind I decided to implement a client that would provide a more consistent and parseable output.
 
 ```bash
-❯ mpc-rs status
+❯ mp-cli status
 volume=100
 state=play
 artist=King Gizzard & The Lizard Wizard
@@ -69,7 +69,7 @@ This format is easily and efficiently parseable in a shell script:
 ```bash
 #! /usr/bin/env bash
 
-status=$(mpc-rs)
+status=$(mp-cli)
 
 while IFS='=' read -r key value; do
 	case "$key" in
@@ -89,7 +89,7 @@ echo "${volume}"
 Alternatively the status can be presented as JSON.
 
 ```bash
-❯ mpc-rs --format json status | jq
+❯ mp-cli --format json status | jq
 {
   "volume": "100",
   "state": "play",

@@ -1,12 +1,12 @@
 [package]
-name = "mpc-rs"
+name = "mp-cli"
 version = "0.1.0"
 edition = "2021"
 authors = ["John Allen <john@threedogconsulting.com"]
 description = "A Music Player Daemon (MPD) CLI client implemented in Rust."
-homepage = "https://github.com/johnallen3d/mpc-rs"
+homepage = "https://github.com/johnallen3d/mp-cli"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/johnallen3d/mpc-rs.git"
+repository = "https://github.com/johnallen3d/mp-cli.git"
 
 [dependencies]
 clap = { version = "4.4.3", features = ["derive"] }
