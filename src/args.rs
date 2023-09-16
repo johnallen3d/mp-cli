@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Clone, Debug, ValueEnum)]
 pub enum OutputFormat {
-    Txt,
+    Text,
     Json,
 }
 
@@ -12,7 +12,7 @@ pub(crate) struct Cli {
     #[command(subcommand)]
     pub(crate) command: Option<Commands>,
     /// Set output format
-    #[clap(long, value_enum, default_value_t=OutputFormat::Txt)]
+    #[clap(long, value_enum, default_value_t=OutputFormat::Json)]
     pub(crate) format: OutputFormat,
 }
 
