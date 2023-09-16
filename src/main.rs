@@ -17,6 +17,7 @@ fn main() {
     };
 
     let result = match args.command {
+        Some(Commands::Current) => mpd.current(),
         Some(Commands::Play) => mpd.play(),
         Some(Commands::Next) => mpd.next(),
         Some(Commands::Prev) => mpd.prev(),
@@ -31,19 +32,14 @@ fn main() {
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
 
-        Some(Commands::Status) => Ok(()), // always show status (below)
-        None => Ok(()),                   // default to showing status (below)
+        Some(Commands::Status) => mpd.current_status(args.format),
+        None => Ok(None),
     };
 
-    if let Err(e) = result.and_then(|_| {
-        mpd.current_status().map(|status| match args.format {
-            args::OutputFormat::Json => {
-                println!("{}", serde_json::to_string(&status).unwrap())
-            }
-            args::OutputFormat::Text => println!("{}", status),
-        })
-    }) {
-        handle_error(e);
+    match result {
+        Ok(Some(output)) => println!("{}", output),
+        Ok(None) => (),
+        Err(e) => handle_error(e),
     }
 }
 

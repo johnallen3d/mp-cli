@@ -21,6 +21,9 @@ pub(crate) enum Commands {
     //
     // playback related commands
     //
+    /// Print the current song
+    #[command()]
+    Current,
     /// Start the player
     #[command()]
     Play,
