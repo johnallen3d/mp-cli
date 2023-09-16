@@ -21,7 +21,9 @@ fn main() {
         Some(Commands::Next) => mpd.next(),
         Some(Commands::Prev) => mpd.prev(),
         Some(Commands::Pause) => mpd.pause(),
+        Some(Commands::PauseIfPlaying) => mpd.pause_if_playing(),
         Some(Commands::Toggle) => mpd.toggle(),
+        Some(Commands::Cdprev) => mpd.cdprev(),
         Some(Commands::Stop) => mpd.stop(),
 
         Some(Commands::Clear) => mpd.clear(),
@@ -45,7 +47,10 @@ fn main() {
     }
 }
 
-fn handle_error(e: impl std::fmt::Display) -> ! {
-    println!("{}", e);
+fn handle_error(error: impl std::fmt::Display) -> ! {
+    let err_text = error.to_string();
+    if !err_text.is_empty() {
+        println!("{}", err_text);
+    }
     std::process::exit(1);
 }
