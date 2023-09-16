@@ -5,7 +5,7 @@ A Music Player Daemon (MPD) CLI client implemented in Rust.
 ## Features
 
 - Playback control: `play`/`pause`, `toggle` etc.
-- Volume adjustment: `volume 50`, `volume +10`, `volume -- -10` (FIXME)
+- Volume adjustment: `volume 50`, `volume +10`, `volume -- -10` ([issue](https://github.com/johnallen3d/mpc-rs/issues/1))
 - Status: `status`
 
 ### Full Help
