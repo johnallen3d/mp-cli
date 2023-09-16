@@ -39,35 +39,43 @@ impl Client {
     //
     // playback related commands
     //
+    pub fn current(&mut self) -> eyre::Result<Option<String>> {
+        let status = self.status()?;
 
-    pub fn play(&mut self) -> eyre::Result<()> {
-        self.client.play().map_err(|e| eyre::eyre!(e))
+        Ok(Some(format!("{} - {}", status.artist, status.title)))
     }
 
-    pub fn next(&mut self) -> Result<(), eyre::Error> {
-        self.client.next().map_err(|e| eyre::eyre!(e))
+    pub fn play(&mut self) -> eyre::Result<Option<String>> {
+        self.client.play().map(|_| None).map_err(eyre::Report::from)
     }
 
-    pub fn prev(&mut self) -> Result<(), eyre::Error> {
-        self.client.prev().map_err(|e| eyre::eyre!(e))
+    pub fn next(&mut self) -> eyre::Result<Option<String>> {
+        self.client.next().map(|_| None).map_err(eyre::Report::from)
     }
 
-    pub fn pause(&mut self) -> eyre::Result<()> {
-        self.client.pause(true).map_err(|e| eyre::eyre!(e))
+    pub fn prev(&mut self) -> eyre::Result<Option<String>> {
+        self.client.prev().map(|_| None).map_err(eyre::Report::from)
     }
 
-    pub fn pause_if_playing(&mut self) -> Result<(), eyre::Error> {
+    pub fn pause(&mut self) -> eyre::Result<Option<String>> {
+        self.client
+            .pause(true)
+            .map(|_| None)
+            .map_err(eyre::Report::from)
+    }
+
+    pub fn pause_if_playing(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
             mpd::State::Play => {
                 self.pause()?;
-                Ok(())
+                Ok(None)
             }
             mpd::State::Pause => Err(eyre::eyre!("")),
             mpd::State::Stop => Err(eyre::eyre!("")),
         }
     }
 
-    pub fn cdprev(&mut self) -> Result<(), eyre::Error> {
+    pub fn cdprev(&mut self) -> eyre::Result<Option<String>> {
         let default_duration = Duration::from_secs(0);
         let status = &self.client.status()?;
         let current = status.elapsed.unwrap_or(default_duration).as_secs();
@@ -82,46 +90,51 @@ impl Client {
             self.client.seek(place, 0)?;
         }
 
-        Ok(())
+        Ok(None)
     }
 
-    pub fn toggle(&mut self) -> eyre::Result<()> {
+    pub fn toggle(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
             mpd::State::Play => self.pause()?,
             mpd::State::Pause => self.play()?,
             mpd::State::Stop => self.play()?,
         };
 
-        Ok(())
+        Ok(None)
     }
 
-    pub fn stop(&mut self) -> eyre::Result<()> {
-        self.client.stop().map_err(|e| eyre::eyre!(e))
+    pub fn stop(&mut self) -> eyre::Result<Option<String>> {
+        self.client.stop().map(|_| None).map_err(eyre::Report::from)
     }
 
     //
     // playlist related commands
     //
 
-    pub fn clear(&mut self) -> Result<(), eyre::Error> {
-        self.client.clear().map_err(|e| eyre::eyre!(e))
+    pub fn clear(&mut self) -> eyre::Result<Option<String>> {
+        self.client
+            .clear()
+            .map(|_| None)
+            .map_err(eyre::Report::from)
     }
 
-    pub fn queued(&mut self) -> Result<(), eyre::Error> {
+    pub fn queued(&mut self) -> eyre::Result<Option<String>> {
         if let Some(song) =
             self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
         {
-            println!("{}", song.title.as_ref().unwrap_or(&"".to_string()));
+            Ok(Some(
+                song.title.as_ref().unwrap_or(&"".to_string()).to_owned(),
+            ))
+        } else {
+            Ok(None)
         }
-
-        Ok(())
     }
 
     //
     // volume related commands
     //
 
-    pub fn set_volume(&mut self, input: &str) -> eyre::Result<()> {
+    pub fn set_volume(&mut self, input: &str) -> eyre::Result<Option<String>> {
         let current = self.client.status()?.volume;
 
         let target = match input {
@@ -142,14 +155,17 @@ impl Client {
             _ => input.parse::<i8>().unwrap_or(0),
         };
 
-        self.client.volume(target).map_err(|e| eyre::eyre!(e))
+        self.client
+            .volume(target)
+            .map(|_| None)
+            .map_err(eyre::Report::from)
     }
 
     //
     // output related commands
     //
 
-    pub fn current_status(&mut self) -> eyre::Result<Status> {
+    fn status(&mut self) -> eyre::Result<Status> {
         let status = self.client.status()?;
 
         let volume = status.volume.to_string();
@@ -172,14 +188,24 @@ impl Client {
         }
         .to_string();
 
-        let status = Status {
+        Ok(Status {
             volume,
             state,
             artist,
             title,
+        })
+    }
+
+    pub fn current_status(
+        &mut self,
+        format: crate::args::OutputFormat,
+    ) -> eyre::Result<Option<String>> {
+        let status = self.status()?;
+        let response = match format {
+            crate::args::OutputFormat::Json => serde_json::to_string(&status)?,
+            crate::args::OutputFormat::Text => format!("{}", status),
         };
 
-        // Ok(to_string(&status)?)
-        Ok(status)
+        Ok(Some(response))
     }
 }
