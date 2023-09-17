@@ -156,6 +156,21 @@ impl Client {
         self.current_status(format)
     }
 
+    pub(crate) fn random(
+        &mut self,
+        state: Option<OnOff>,
+        format: crate::args::OutputFormat,
+    ) -> eyre::Result<Option<String>> {
+        let state = match state {
+            Some(state) => state == OnOff::On,
+            None => !self.client.status()?.random,
+        };
+
+        self.client.random(state)?;
+
+        self.current_status(format)
+    }
+
     //
     // volume related commands
     //
