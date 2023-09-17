@@ -64,6 +64,6 @@ jobs:
         if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: mpc-rs
+          bin: mp-cli
           target: ${{ matrix.target }}
           token: ${{ secrets.GITHUB_TOKEN }}
