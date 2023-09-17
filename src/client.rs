@@ -27,9 +27,9 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new() -> eyre::Result<Client> {
+    pub fn new(bind_to_address: &str, port: &str) -> eyre::Result<Client> {
         // TODO: read connection details from mpd.conf
-        let client = mpd::Client::connect("127.0.0.1:6600")
+        let client = mpd::Client::connect(format!("{bind_to_address}:{port}"))
             .wrap_err("Error connecting to mpd server".to_string())?;
 
         Ok(Self { client })

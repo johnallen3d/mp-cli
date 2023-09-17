@@ -11,7 +11,11 @@ use args::{Cli, Commands};
 fn main() {
     let args = Cli::parse();
 
-    let mut mpd = match crate::client::Client::new() {
+    // safe to unwrap because we have default values
+    let mut mpd = match crate::client::Client::new(
+        &args.bind_to_address.unwrap(),
+        &args.port.unwrap(),
+    ) {
         Ok(client) => client,
         Err(e) => handle_error(e),
     };
