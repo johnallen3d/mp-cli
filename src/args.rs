@@ -30,6 +30,9 @@ pub(crate) enum Commands {
     /// Print the current song
     #[command()]
     Current,
+    /// Print the current song
+    #[command()]
+    Del { position: Option<u32> },
 
     //
     // playback related commands
