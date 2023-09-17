@@ -1,5 +1,5 @@
 # mp-cli
-[![ci](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/johnallen3d/mpc-rs/badge.svg?branch=main)](https://coveralls.io/github/johnallen3d/mpc-rs?branch=main) [![Crate Status](https://img.shields.io/crates/v/mp-cli.svg)]
+[![ci](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/johnallen3d/mpc-rs/badge.svg?branch=main)](https://coveralls.io/github/johnallen3d/mpc-rs?branch=main) [![Crate Status](https://img.shields.io/crates/v/mp-cli.svg)](https://crates.io/crates/mp-cli)
 
 A Music Player Daemon (MPD) CLI client implemented in Rust.
 
@@ -18,20 +18,23 @@ Music Player Daemon client written in Rust
 Usage: mp-cli [OPTIONS] [COMMAND]
 
 Commands:
-  play    Start the player
-  next    Next song in the queue
-  prev    Previous song in the queue
-  pause   Pause the player
-  toggle  Toggle play/pause
-  stop    Stop the player
-  clear   Clear the current playlist
-  queued  Display the next song in the queue
-  volume  Set the volume to specified value <num> or increase/decrease it [+-]<num>
-  status  Get the current status of the player
-  help    Print this message or the help of the given subcommand(s)
+  current           Print the current song
+  play              Start the player
+  next              Next song in the queue
+  prev              Previous song in the queue
+  pause             Pause the player
+  pause-if-playing  Pause the player if it is playing
+  cdprev            CD player like previous song
+  toggle            Toggle play/pause
+  stop              Stop the player
+  clear             Clear the current playlist
+  queued            Display the next song in the queue
+  volume            Set the volume to specified value <num> or increase/decrease it [+-]<num>
+  status            Get the current status of the player
+  help              Print this message or the help of the given subcommand(s)
 
 Options:
-      --format <FORMAT>  Set output format [default: txt] [possible values: txt, json]
+      --format <FORMAT>  Set output format [default: json] [possible values: text, json]
   -h, --help             Print help
 ```
 

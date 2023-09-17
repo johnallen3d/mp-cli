@@ -36,7 +36,7 @@ pub(crate) enum Commands {
     /// Pause the player
     #[command()]
     Pause,
-    /// Pause the player if it's playing
+    /// Pause the player if it is playing
     #[command()]
     PauseIfPlaying,
     /// CD player like previous song
