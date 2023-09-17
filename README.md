@@ -1,4 +1,5 @@
 # mp-cli
+[![ci](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/johnallen3d/mp-cli/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/johnallen3d/mpc-rs/badge.svg?branch=main)](https://coveralls.io/github/johnallen3d/mpc-rs?branch=main) [![Crate Status](https://img.shields.io/crates/v/mp-cli.svg)]
 
 A Music Player Daemon (MPD) CLI client implemented in Rust.
 
@@ -42,12 +43,10 @@ At this time it is necessary to compile and install the crate locally. The simpl
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Then use `cargo` to build and install locally.
+Then use `cargo` to build and install from [crates.io](https://crates.io/crates/mp-cli).
 
 ```bash
-git clone https://github.com/johnallen3d/mp-cli.git
-cd mp-cli
-cargo install --path .
+cargo install mp-cli
 ```
 
 ## Why?
