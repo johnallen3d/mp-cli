@@ -62,9 +62,12 @@ pub(crate) enum Commands {
     /// Shuffle the queue
     #[command()]
     Shuffle,
-    /// Toggle repeat or set to provide state
+    /// Toggle repeat or set to provided state
     #[command()]
     Repeat { state: Option<OnOff> },
+    /// Toggle random or set to provided state
+    #[command()]
+    Random { state: Option<OnOff> },
 
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]
