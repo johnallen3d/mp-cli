@@ -186,6 +186,21 @@ impl Client {
         self.current_status(format)
     }
 
+    pub fn consume(
+        &mut self,
+        state: Option<OnOff>,
+        format: OutputFormat,
+    ) -> eyre::Result<Option<String>> {
+        let state = match state {
+            Some(state) => state == OnOff::On,
+            None => !self.client.status()?.consume,
+        };
+
+        self.client.consume(state)?;
+
+        self.current_status(format)
+    }
+
     //
     // volume related commands
     //
