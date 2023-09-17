@@ -43,7 +43,7 @@ fn main() {
         Some(Commands::Version) => mpd.version(),
 
         Some(Commands::Status) => mpd.current_status(args.format),
-        None => Ok(None),
+        None => mpd.current_status(args.format),
     };
 
     match result {

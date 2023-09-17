@@ -1,3 +1,5 @@
+use std::fmt;
+
 use clap::{Parser, Subcommand, ValueEnum};
 use serde::Serialize;
 
@@ -109,6 +111,15 @@ impl From<bool> for OnOff {
             OnOff::On
         } else {
             OnOff::Off
+        }
+    }
+}
+
+impl fmt::Display for OnOff {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OnOff::On => write!(f, "on"),
+            OnOff::Off => write!(f, "off"),
         }
     }
 }
