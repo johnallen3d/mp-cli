@@ -244,6 +244,20 @@ impl Client {
         self.current_status()
     }
 
+    pub fn del(
+        &mut self,
+        position: Option<u32>,
+    ) -> eyre::Result<Option<String>> {
+        let postion = match position {
+            Some(position) => position,
+            None => self.status()?.position,
+        };
+
+        self.client.delete(postion)?;
+
+        self.current_status()
+    }
+
     //
     // playback related commands
     //
