@@ -40,6 +40,7 @@ fn main() {
         Some(Commands::Consume { state }) => mpd.consume(state, args.format),
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
+        Some(Commands::Version) => mpd.version(),
 
         Some(Commands::Status) => mpd.current_status(args.format),
         None => Ok(None),

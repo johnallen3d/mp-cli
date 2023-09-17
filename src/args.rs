@@ -79,6 +79,10 @@ pub(crate) enum Commands {
     #[command()]
     Volume { volume: String },
 
+    /// Provide the mpd version and the mp-cli version
+    #[command()]
+    Version,
+
     //
     // output related commands
     //
