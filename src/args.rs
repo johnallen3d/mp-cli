@@ -14,6 +14,12 @@ pub(crate) struct Cli {
     /// Set output format
     #[clap(long, value_enum, default_value_t=OutputFormat::Json)]
     pub(crate) format: OutputFormat,
+    /// Set the ip address the mpd server is listening on
+    #[clap(long, default_value = "127.0.0.1")]
+    pub(crate) bind_to_address: Option<String>,
+    /// Set the port the mpd server is listening on
+    #[clap(long, default_value = "6600")]
+    pub(crate) port: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]
