@@ -1,8 +1,8 @@
+use std::fmt;
 use std::time::Duration;
 
 use eyre::WrapErr;
 use serde::Serialize;
-use std::fmt;
 
 use crate::args::{OnOff, OutputFormat};
 
@@ -12,6 +12,10 @@ pub struct Status {
     state: String,
     artist: String,
     title: String,
+    position: u32,
+    queue_count: u32,
+    elapsed: Time,
+    track_length: Time,
     repeat: OnOff,
     random: OnOff,
     single: OnOff,
@@ -22,9 +26,66 @@ impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "volume={}\nstate={}\nartist={}\ntitle={}",
-            self.volume, self.state, self.artist, self.title
+            "volume={}\nstate={}\nartist={}\ntitle={}\nposition={}\nqueue_count={}\nelapsed={}\ntrack_length={}\nrepeat={}\nrandom={}\nsingle={}\nconsume={}",
+            self.volume,
+            self.state,
+            self.artist,
+            self.title,
+            self.position,
+            self.queue_count,
+            self.elapsed,
+            self.track_length,
+            self.repeat,
+            self.random,
+            self.single,
+            self.consume,
         )
+    }
+}
+
+#[derive(Serialize)]
+pub struct TrackTime {
+    elapsed: Time,
+    total: Time,
+}
+
+impl From<Option<(Duration, Duration)>> for TrackTime {
+    fn from(time: Option<(Duration, Duration)>) -> Self {
+        match time {
+            Some((elapsed, total)) => TrackTime {
+                elapsed: Time::from(elapsed),
+                total: Time::from(total),
+            },
+            None => TrackTime {
+                elapsed: Time::from(0),
+                total: Time::from(0),
+            },
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct Time(String);
+
+impl From<Duration> for Time {
+    fn from(duration: Duration) -> Self {
+        Time(format!(
+            "{:02}:{:02}",
+            duration.as_secs() / 60,
+            duration.as_secs() % 60
+        ))
+    }
+}
+
+impl From<u32> for Time {
+    fn from(duration: u32) -> Self {
+        Time(format!("{:02}:{:02}", duration / 60, duration % 60))
+    }
+}
+
+impl fmt::Display for Time {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -272,11 +333,21 @@ impl Client {
         }
         .to_string();
 
+        let position = match status.song {
+            Some(song) => song.pos,
+            None => 0,
+        };
+        let time = TrackTime::from(status.time);
+
         Ok(Status {
             volume,
             state,
             artist,
             title,
+            position,
+            queue_count: status.queue_len,
+            elapsed: time.elapsed,
+            track_length: time.total,
             repeat: OnOff::from(status.repeat),
             random: OnOff::from(status.random),
             single: OnOff::from(status.single),
