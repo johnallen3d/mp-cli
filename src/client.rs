@@ -201,6 +201,19 @@ impl Client {
         self.current_status(format)
     }
 
+    pub fn version(&mut self) -> eyre::Result<Option<String>> {
+        let mpd_version = format!(
+            "{}.{}.{}",
+            self.client.version.0, self.client.version.1, self.client.version.2
+        );
+        let mp_cli_version: &str = env!("CARGO_PKG_VERSION");
+
+        Ok(Some(format!(
+            "mpd version: {}\nmp-cli version: {}",
+            mpd_version, mp_cli_version
+        )))
+    }
+
     //
     // volume related commands
     //
