@@ -34,6 +34,7 @@ fn main() {
         Some(Commands::Clear) => mpd.clear(),
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
+        Some(Commands::Repeat { state }) => mpd.repeat(state, args.format),
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
 

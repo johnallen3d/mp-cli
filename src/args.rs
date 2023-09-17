@@ -1,10 +1,5 @@
 use clap::{Parser, Subcommand, ValueEnum};
-
-#[derive(Clone, Debug, ValueEnum)]
-pub enum OutputFormat {
-    Text,
-    Json,
-}
+use serde::Serialize;
 
 /// Music Player Daemon client written in Rust
 #[derive(Debug, Parser)]
@@ -67,10 +62,10 @@ pub(crate) enum Commands {
     /// Shuffle the queue
     #[command()]
     Shuffle,
+    /// Toggle repeat or set to provide state
+    #[command()]
+    Repeat { state: Option<OnOff> },
 
-    //
-    // volume related commands
-    //
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]
     Volume { volume: String },
@@ -81,4 +76,26 @@ pub(crate) enum Commands {
     /// Get the current status of the player
     #[command()]
     Status,
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+pub enum OutputFormat {
+    Text,
+    Json,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, ValueEnum)]
+pub enum OnOff {
+    On,
+    Off,
+}
+
+impl From<bool> for OnOff {
+    fn from(value: bool) -> Self {
+        if value {
+            OnOff::On
+        } else {
+            OnOff::Off
+        }
+    }
 }
