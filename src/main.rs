@@ -37,6 +37,7 @@ fn main() {
         Some(Commands::Repeat { state }) => mpd.repeat(state, args.format),
         Some(Commands::Random { state }) => mpd.random(state, args.format),
         Some(Commands::Single { state }) => mpd.single(state, args.format),
+        Some(Commands::Consume { state }) => mpd.consume(state, args.format),
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
 

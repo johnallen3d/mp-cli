@@ -71,6 +71,9 @@ pub(crate) enum Commands {
     /// Toggle single mode or set to provided state
     #[command()]
     Single { state: Option<OnOff> },
+    /// Toggle consume mode or set to provided state
+    #[command()]
+    Consume { state: Option<OnOff> },
 
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]
