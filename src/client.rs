@@ -4,12 +4,18 @@ use eyre::WrapErr;
 use serde::Serialize;
 use std::fmt;
 
+use crate::args::OnOff;
+
 #[derive(Serialize)]
 pub struct Status {
     volume: String,
     state: String,
     artist: String,
     title: String,
+    repeat: OnOff,
+    random: OnOff,
+    single: OnOff,
+    consume: OnOff,
 }
 
 impl fmt::Display for Status {
@@ -135,6 +141,21 @@ impl Client {
         Ok(None)
     }
 
+    pub fn repeat(
+        &mut self,
+        state: Option<OnOff>,
+        format: crate::args::OutputFormat,
+    ) -> eyre::Result<Option<String>> {
+        let state = match state {
+            Some(state) => state == OnOff::On,
+            None => !self.client.status()?.repeat,
+        };
+
+        self.client.repeat(state)?;
+
+        self.current_status(format)
+    }
+
     //
     // volume related commands
     //
@@ -198,6 +219,10 @@ impl Client {
             state,
             artist,
             title,
+            repeat: OnOff::from(status.repeat),
+            random: OnOff::from(status.random),
+            single: OnOff::from(status.single),
+            consume: OnOff::from(status.consume),
         })
     }
 
