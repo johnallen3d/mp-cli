@@ -4,7 +4,7 @@ use eyre::WrapErr;
 use serde::Serialize;
 use std::fmt;
 
-use crate::args::OnOff;
+use crate::args::{OnOff, OutputFormat};
 
 #[derive(Serialize)]
 pub struct Status {
@@ -144,7 +144,7 @@ impl Client {
     pub fn repeat(
         &mut self,
         state: Option<OnOff>,
-        format: crate::args::OutputFormat,
+        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -159,7 +159,7 @@ impl Client {
     pub(crate) fn random(
         &mut self,
         state: Option<OnOff>,
-        format: crate::args::OutputFormat,
+        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -167,6 +167,21 @@ impl Client {
         };
 
         self.client.random(state)?;
+
+        self.current_status(format)
+    }
+
+    pub(crate) fn single(
+        &mut self,
+        state: Option<OnOff>,
+        format: OutputFormat,
+    ) -> eyre::Result<Option<String>> {
+        let state = match state {
+            Some(state) => state == OnOff::On,
+            None => !self.client.status()?.single,
+        };
+
+        self.client.single(state)?;
 
         self.current_status(format)
     }
@@ -243,12 +258,12 @@ impl Client {
 
     pub fn current_status(
         &mut self,
-        format: crate::args::OutputFormat,
+        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let status = self.status()?;
         let response = match format {
-            crate::args::OutputFormat::Json => serde_json::to_string(&status)?,
-            crate::args::OutputFormat::Text => format!("{}", status),
+            OutputFormat::Json => serde_json::to_string(&status)?,
+            OutputFormat::Text => format!("{}", status),
         };
 
         Ok(Some(response))
