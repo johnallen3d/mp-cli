@@ -288,7 +288,6 @@ impl Client {
         port: &str,
         format: OutputFormat,
     ) -> eyre::Result<Client> {
-        // TODO: read connection details from mpd.conf
         let client = mpd::Client::connect(format!("{bind_to_address}:{port}"))
             .wrap_err("Error connecting to mpd server".to_string())?;
 
@@ -298,6 +297,31 @@ impl Client {
     //
     // queue related commands
     //
+    pub fn add(&mut self, path: &str) -> eyre::Result<Option<String>> {
+        let music_dir = self.client.music_directory()?;
+
+        let mut file = match path.strip_prefix(&music_dir) {
+            Some(remainder) => remainder,
+            None => path,
+        }
+        .to_string();
+
+        if file.starts_with('/') {
+            file.remove(0);
+        }
+
+        let song = crate::mpd::song::Song {
+            file: file.clone(),
+            ..Default::default()
+        };
+
+        self.client
+            .push(song)
+            .wrap_err(format!("unkown or inalid path: {file}"))?;
+
+        Ok(None)
+    }
+
     pub fn crop(&mut self) -> eyre::Result<Option<String>> {
         // determine current song position
         // remove all songs before current song
