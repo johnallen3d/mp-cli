@@ -5,39 +5,7 @@ A Music Player Daemon (MPD) CLI client implemented in Rust.
 
 ## Features
 
-- Playback control: `play`/`pause`, `toggle` etc.
-- Volume adjustment: `volume 50`, `volume +10`, `volume -- -10` ([issue](https://github.com/johnallen3d/mp-cli/issues/1))
-- Status: `status`
-
-### Full Help
-
-```bash
-❯ mp-cli help
-Music Player Daemon client written in Rust
-
-Usage: mp-cli [OPTIONS] [COMMAND]
-
-Commands:
-  current           Print the current song
-  play              Start the player
-  next              Next song in the queue
-  prev              Previous song in the queue
-  pause             Pause the player
-  pause-if-playing  Pause the player if it is playing
-  cdprev            CD player like previous song
-  toggle            Toggle play/pause
-  stop              Stop the player
-  clear             Clear the current playlist
-  queued            Display the next song in the queue
-  shuffle           Shuffle the queue
-  volume            Set the volume to specified value <num> or increase/decrease it [+-]<num>
-  status            Get the current status of the player
-  help              Print this message or the help of the given subcommand(s)
-
-Options:
-      --format <FORMAT>  Set output format [default: json] [possible values: text, json]
-  -h, --help             Print help
-```
+I'm working towards compatibility with [mpc](https://github.com/MusicPlayerDaemon/mpc) over time. See [this tracking issue](https://github.com/johnallen3d/mp-cli/issues/16) for the current status.
 
 ## Installation
 
