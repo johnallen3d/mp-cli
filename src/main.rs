@@ -23,6 +23,7 @@ fn main() {
     };
 
     let result = match args.command {
+        Some(Commands::Crop) => mpd.crop(),
         Some(Commands::Current) => mpd.current(),
         Some(Commands::Play) => mpd.play(),
         Some(Commands::Next) => mpd.next(),

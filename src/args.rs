@@ -22,11 +22,18 @@ pub(crate) struct Cli {
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
     //
-    // playback related commands
+    // queue related commands
     //
+    /// Remove all but the current song from the queue
+    #[command()]
+    Crop,
     /// Print the current song
     #[command()]
     Current,
+
+    //
+    // playback related commands
+    //
     /// Start the player
     #[command()]
     Play,

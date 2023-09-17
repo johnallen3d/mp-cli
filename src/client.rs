@@ -223,6 +223,28 @@ impl Client {
     }
 
     //
+    // queue related commands
+    //
+    pub fn crop(&mut self) -> eyre::Result<Option<String>> {
+        // determine current song position
+        // remove all songs before current song
+        // remove all songs from 1 onwards
+        let status = self.status()?;
+        let current_position = status.position;
+        let length = status.queue_count;
+
+        if length < 1 {
+            return self.current_status();
+        }
+
+        self.client.delete(0..current_position)?;
+        // it doesn't matter that the range is out of bounds
+        self.client.delete(1..length)?;
+
+        self.current_status()
+    }
+
+    //
     // playback related commands
     //
     pub fn current(&mut self) -> eyre::Result<Option<String>> {
