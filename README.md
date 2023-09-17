@@ -29,6 +29,7 @@ Commands:
   stop              Stop the player
   clear             Clear the current playlist
   queued            Display the next song in the queue
+  shuffle           Shuffle the queue
   volume            Set the volume to specified value <num> or increase/decrease it [+-]<num>
   status            Get the current status of the player
   help              Print this message or the help of the given subcommand(s)

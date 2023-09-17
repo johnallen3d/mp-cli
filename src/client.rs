@@ -2,7 +2,6 @@ use std::time::Duration;
 
 use eyre::WrapErr;
 use serde::Serialize;
-// use serde_json::to_string;
 use std::fmt;
 
 #[derive(Serialize)]
@@ -128,6 +127,12 @@ impl Client {
         } else {
             Ok(None)
         }
+    }
+
+    pub fn shuffle(&mut self) -> eyre::Result<Option<String>> {
+        self.client.shuffle(..)?;
+
+        Ok(None)
     }
 
     //

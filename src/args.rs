@@ -58,6 +58,9 @@ pub(crate) enum Commands {
     /// Display the next song in the queue
     #[command()]
     Queued,
+    /// Shuffle the queue
+    #[command()]
+    Shuffle,
 
     //
     // volume related commands
