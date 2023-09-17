@@ -1,3 +1,4 @@
+extern crate chrono;
 extern crate mpd;
 extern crate serde_json;
 
@@ -15,6 +16,7 @@ fn main() {
     let mut mpd = match crate::client::Client::new(
         &args.bind_to_address.unwrap(),
         &args.port.unwrap(),
+        args.format.clone(),
     ) {
         Ok(client) => client,
         Err(e) => handle_error(e),
@@ -34,16 +36,17 @@ fn main() {
         Some(Commands::Clear) => mpd.clear(),
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
-        Some(Commands::Repeat { state }) => mpd.repeat(state, args.format),
-        Some(Commands::Random { state }) => mpd.random(state, args.format),
-        Some(Commands::Single { state }) => mpd.single(state, args.format),
-        Some(Commands::Consume { state }) => mpd.consume(state, args.format),
+        Some(Commands::Repeat { state }) => mpd.repeat(state),
+        Some(Commands::Random { state }) => mpd.random(state),
+        Some(Commands::Single { state }) => mpd.single(state),
+        Some(Commands::Consume { state }) => mpd.consume(state),
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
+        Some(Commands::Stats) => mpd.stats(),
         Some(Commands::Version) => mpd.version(),
 
-        Some(Commands::Status) => mpd.current_status(args.format),
-        None => mpd.current_status(args.format),
+        Some(Commands::Status) => mpd.current_status(),
+        None => mpd.current_status(),
     };
 
     match result {

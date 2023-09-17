@@ -1,6 +1,7 @@
 use std::fmt;
 use std::time::Duration;
 
+use chrono::{TimeZone, Utc};
 use eyre::WrapErr;
 use serde::Serialize;
 
@@ -40,6 +41,39 @@ impl fmt::Display for Status {
             self.single,
             self.consume,
         )
+    }
+}
+
+#[derive(Serialize)]
+struct Song(mpd::song::Song);
+
+#[derive(Serialize)]
+struct Current {
+    artist: String,
+    title: String,
+}
+
+impl From<Status> for Current {
+    fn from(status: Status) -> Self {
+        Current {
+            artist: status.artist,
+            title: status.title,
+        }
+    }
+}
+
+impl From<Song> for Current {
+    fn from(song: Song) -> Self {
+        Current {
+            artist: song.0.artist.unwrap_or("".to_string()),
+            title: song.0.title.unwrap_or("".to_string()),
+        }
+    }
+}
+
+impl fmt::Display for Current {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "artist={}\ntitle={}", self.artist, self.title)
     }
 }
 
@@ -89,53 +123,146 @@ impl fmt::Display for Time {
     }
 }
 
+struct HumanReadableDuration(core::time::Duration);
+
+impl From<Duration> for HumanReadableDuration {
+    fn from(duration: Duration) -> Self {
+        HumanReadableDuration(duration)
+    }
+}
+
+impl ToString for HumanReadableDuration {
+    fn to_string(&self) -> String {
+        let total_seconds = self.0.as_secs();
+        let days = total_seconds / 86400;
+        let hours = (total_seconds % 86400) / 3600;
+        let minutes = (total_seconds % 3600) / 60;
+        let seconds = total_seconds % 60;
+
+        format!("{} days, {}:{:02}:{:02}", days, hours, minutes, seconds)
+    }
+}
+#[derive(Serialize)]
+struct Stats {
+    artists: u32,
+    albums: u32,
+    songs: u32,
+    uptime: String,
+    playtime: String,
+    db_playtime: String,
+    db_update: String,
+}
+
+impl Stats {
+    pub fn new(stats: mpd::stats::Stats) -> Self {
+        let db_update =
+            match Utc.timestamp_opt(stats.db_update.as_secs() as i64, 0) {
+                chrono::LocalResult::Single(date_time) => {
+                    date_time.format("%a %b %d %H:%M:%S %Y").to_string()
+                }
+                _ => "".to_string(),
+            };
+
+        Self {
+            artists: stats.artists,
+            albums: stats.albums,
+            songs: stats.songs,
+            uptime: HumanReadableDuration::from(stats.uptime).to_string(),
+            playtime: HumanReadableDuration::from(stats.playtime).to_string(),
+            db_playtime: HumanReadableDuration::from(stats.db_playtime)
+                .to_string(),
+            db_update,
+        }
+    }
+}
+
+impl fmt::Display for Stats {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "artists={}\nalbums={}\nsongs={}\nuptime={}\nplaytime={}\ndb_playtime={}\ndb_update={}",
+            self.artists,
+            self.albums,
+            self.songs,
+            self.uptime,
+            self.playtime,
+            self.db_playtime,
+            self.db_update,
+            )
+    }
+}
+
+#[derive(Serialize)]
+pub struct Versions {
+    mpd: String,
+    mp_cli: String,
+}
+
+impl fmt::Display for Versions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "mpd={}\nmp-cli={}", self.mpd, self.mp_cli)
+    }
+}
+
 pub struct Client {
     client: mpd::Client,
+    format: OutputFormat,
 }
 
 impl Client {
-    pub fn new(bind_to_address: &str, port: &str) -> eyre::Result<Client> {
+    pub fn new(
+        bind_to_address: &str,
+        port: &str,
+        format: OutputFormat,
+    ) -> eyre::Result<Client> {
         // TODO: read connection details from mpd.conf
         let client = mpd::Client::connect(format!("{bind_to_address}:{port}"))
             .wrap_err("Error connecting to mpd server".to_string())?;
 
-        Ok(Self { client })
+        Ok(Self { client, format })
     }
 
     //
     // playback related commands
     //
     pub fn current(&mut self) -> eyre::Result<Option<String>> {
-        let status = self.status()?;
+        let current = Current::from(self.status()?);
 
-        Ok(Some(format!("{} - {}", status.artist, status.title)))
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&current)?,
+            OutputFormat::Text => current.to_string(),
+        };
+
+        Ok(Some(response))
     }
 
     pub fn play(&mut self) -> eyre::Result<Option<String>> {
-        self.client.play().map(|_| None).map_err(eyre::Report::from)
+        self.client.play()?;
+
+        self.current_status()
     }
 
     pub fn next(&mut self) -> eyre::Result<Option<String>> {
-        self.client.next().map(|_| None).map_err(eyre::Report::from)
+        self.client.next()?;
+
+        self.current_status()
     }
 
     pub fn prev(&mut self) -> eyre::Result<Option<String>> {
-        self.client.prev().map(|_| None).map_err(eyre::Report::from)
+        self.client.prev()?;
+
+        self.current_status()
     }
 
     pub fn pause(&mut self) -> eyre::Result<Option<String>> {
-        self.client
-            .pause(true)
-            .map(|_| None)
-            .map_err(eyre::Report::from)
+        self.client.pause(true)?;
+
+        self.current_status()
     }
 
     pub fn pause_if_playing(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
-            mpd::State::Play => {
-                self.pause()?;
-                Ok(None)
-            }
+            mpd::State::Play => self.pause(),
             mpd::State::Pause => Err(eyre::eyre!("")),
             mpd::State::Stop => Err(eyre::eyre!("")),
         }
@@ -147,30 +274,30 @@ impl Client {
         let current = status.elapsed.unwrap_or(default_duration).as_secs();
 
         if current < 3 {
-            self.prev()?;
+            self.prev()
         } else {
             let place = match status.song {
                 Some(ref song) => song.pos,
                 None => 0,
             };
             self.client.seek(place, 0)?;
-        }
 
-        Ok(None)
+            self.current_status()
+        }
     }
 
     pub fn toggle(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
-            mpd::State::Play => self.pause()?,
-            mpd::State::Pause => self.play()?,
-            mpd::State::Stop => self.play()?,
-        };
-
-        Ok(None)
+            mpd::State::Play => self.pause(),
+            mpd::State::Pause => self.play(),
+            mpd::State::Stop => self.play(),
+        }
     }
 
     pub fn stop(&mut self) -> eyre::Result<Option<String>> {
-        self.client.stop().map(|_| None).map_err(eyre::Report::from)
+        self.client.stop()?;
+
+        self.current_status()
     }
 
     //
@@ -178,19 +305,24 @@ impl Client {
     //
 
     pub fn clear(&mut self) -> eyre::Result<Option<String>> {
-        self.client
-            .clear()
-            .map(|_| None)
-            .map_err(eyre::Report::from)
+        self.client.clear()?;
+
+        self.current_status()
     }
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
         if let Some(song) =
             self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
         {
-            Ok(Some(
-                song.title.as_ref().unwrap_or(&"".to_string()).to_owned(),
-            ))
+            // safe to unwrap because we know we have a song
+            let current = Current::from(Song(song.clone()));
+
+            let response = match self.format {
+                OutputFormat::Json => serde_json::to_string(&current)?,
+                OutputFormat::Text => current.to_string(),
+            };
+
+            Ok(Some(response))
         } else {
             Ok(None)
         }
@@ -199,13 +331,12 @@ impl Client {
     pub fn shuffle(&mut self) -> eyre::Result<Option<String>> {
         self.client.shuffle(..)?;
 
-        Ok(None)
+        self.current_status()
     }
 
     pub fn repeat(
         &mut self,
         state: Option<OnOff>,
-        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -214,13 +345,12 @@ impl Client {
 
         self.client.repeat(state)?;
 
-        self.current_status(format)
+        self.current_status()
     }
 
     pub(crate) fn random(
         &mut self,
         state: Option<OnOff>,
-        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -229,13 +359,12 @@ impl Client {
 
         self.client.random(state)?;
 
-        self.current_status(format)
+        self.current_status()
     }
 
     pub(crate) fn single(
         &mut self,
         state: Option<OnOff>,
-        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -244,13 +373,12 @@ impl Client {
 
         self.client.single(state)?;
 
-        self.current_status(format)
+        self.current_status()
     }
 
     pub fn consume(
         &mut self,
         state: Option<OnOff>,
-        format: OutputFormat,
     ) -> eyre::Result<Option<String>> {
         let state = match state {
             Some(state) => state == OnOff::On,
@@ -259,20 +387,35 @@ impl Client {
 
         self.client.consume(state)?;
 
-        self.current_status(format)
+        self.current_status()
     }
 
     pub fn version(&mut self) -> eyre::Result<Option<String>> {
-        let mpd_version = format!(
+        let mpd = format!(
             "{}.{}.{}",
             self.client.version.0, self.client.version.1, self.client.version.2
         );
-        let mp_cli_version: &str = env!("CARGO_PKG_VERSION");
+        let mp_cli = env!("CARGO_PKG_VERSION").to_string();
 
-        Ok(Some(format!(
-            "mpd version: {}\nmp-cli version: {}",
-            mpd_version, mp_cli_version
-        )))
+        let versions = Versions { mpd, mp_cli };
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&versions)?,
+            OutputFormat::Text => versions.to_string(),
+        };
+
+        Ok(Some(response))
+    }
+
+    pub fn stats(&mut self) -> eyre::Result<Option<String>> {
+        let stats = Stats::new(self.client.stats()?);
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&stats)?,
+            OutputFormat::Text => stats.to_string(),
+        };
+
+        Ok(Some(response))
     }
 
     //
@@ -355,12 +498,9 @@ impl Client {
         })
     }
 
-    pub fn current_status(
-        &mut self,
-        format: OutputFormat,
-    ) -> eyre::Result<Option<String>> {
+    pub fn current_status(&mut self) -> eyre::Result<Option<String>> {
         let status = self.status()?;
-        let response = match format {
+        let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&status)?,
             OutputFormat::Text => format!("{}", status),
         };
