@@ -1,24 +1,22 @@
-name: ci
+name: docs
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 jobs:
-  build:
+  update-help:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
 
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2
@@ -26,11 +24,13 @@ jobs:
       - name: Build crate
         run: cargo build
 
-      - name: Run tests
-        run: cargo test
+      - name: Update help
+        if: ${{ github.event_name == 'pull_request' }}
+        run: cargo run --quiet -- help > doc/help.txt
 
-      - name: Check formatting
-        run: cargo fmt --all --check
-
-      - name: Run clippy
-        run: cargo clippy
+      - name: Commit changes
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'docs: update help text'
+          add: 'doc'
