@@ -68,6 +68,9 @@ pub(crate) enum Commands {
     /// Clear the current playlist
     #[command()]
     Clear,
+    /// List current outputs
+    #[command()]
+    Outputs,
     /// Display the next song in the queue
     #[command()]
     Queued,

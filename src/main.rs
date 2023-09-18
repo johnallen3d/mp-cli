@@ -36,6 +36,7 @@ fn main() {
         Some(Commands::Stop) => mpd.stop(),
 
         Some(Commands::Clear) => mpd.clear(),
+        Some(Commands::Outputs) => mpd.outputs(),
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
         Some(Commands::Lsplaylists) => mpd.lsplaylists(),
