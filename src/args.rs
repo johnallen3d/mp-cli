@@ -39,7 +39,7 @@ pub(crate) enum Commands {
     //
     /// Start the player
     #[command()]
-    Play,
+    Play { position: Option<u32> },
     /// Next song in the queue
     #[command()]
     Next,

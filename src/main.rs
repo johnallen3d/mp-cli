@@ -26,7 +26,7 @@ fn main() {
         Some(Commands::Crop) => mpd.crop(),
         Some(Commands::Del { position }) => mpd.del(position),
         Some(Commands::Current) => mpd.current(),
-        Some(Commands::Play) => mpd.play(),
+        Some(Commands::Play { position }) => mpd.play(position),
         Some(Commands::Next) => mpd.next(),
         Some(Commands::Prev) => mpd.prev(),
         Some(Commands::Pause) => mpd.pause(),

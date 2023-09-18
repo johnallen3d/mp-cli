@@ -272,7 +272,36 @@ impl Client {
         Ok(Some(response))
     }
 
-    pub fn play(&mut self) -> eyre::Result<Option<String>> {
+    pub fn play(
+        &mut self,
+        position: Option<u32>,
+    ) -> eyre::Result<Option<String>> {
+        if position.is_none() {
+            self.client.play()?;
+            return self.current_status();
+        }
+        // TODO: this is super hacky, can't find a "jump" in rust-mpd
+
+        // pause
+        // get current position
+        // next/prev to desired position
+        // play
+
+        let position = position.unwrap();
+        let current_position = self.status()?.position;
+
+        self.pause()?;
+
+        if current_position > position {
+            for _ in (position..current_position).rev() {
+                self.prev()?;
+            }
+        } else {
+            for _ in (current_position..position).rev() {
+                self.next()?;
+            }
+        }
+
         self.client.play()?;
 
         self.current_status()
@@ -325,8 +354,8 @@ impl Client {
     pub fn toggle(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
             mpd::State::Play => self.pause(),
-            mpd::State::Pause => self.play(),
-            mpd::State::Stop => self.play(),
+            mpd::State::Pause => self.play(None),
+            mpd::State::Stop => self.play(None),
         }
     }
 
