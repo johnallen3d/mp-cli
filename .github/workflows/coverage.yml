@@ -1,6 +1,12 @@
 name: coverage
 
-on: [push]
+on:
+  push:
+    paths:
+      - "**/*.rs"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - ".github/workflows/rust-ci.yml"
 
 env:
   RUST_BACKTRACE: 1
@@ -26,4 +32,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Report test coverage
-        run: cargo tarpaulin --engine llvm --follow-exec --post-test-delay 10 --coveralls ${{ secrets.COVERALLS_REPO_TOKEN }} 
+        run: cargo tarpaulin --engine llvm --follow-exec --post-test-delay 10 --coveralls ${{ secrets.COVERALLS_REPO_TOKEN }}
