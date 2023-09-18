@@ -217,6 +217,30 @@ impl fmt::Display for Playlists {
 }
 
 #[derive(Serialize)]
+pub struct Outputs {
+    outputs: Vec<Output>,
+}
+
+#[derive(Serialize)]
+pub struct Output(String);
+
+impl From<String> for Output {
+    fn from(name: String) -> Self {
+        Output(name)
+    }
+}
+
+impl fmt::Display for Outputs {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (index, output) in self.outputs.iter().enumerate() {
+            write!(f, "{}={}", index, output.0)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Serialize)]
 pub struct Versions {
     mpd: String,
     mp_cli: String,
@@ -397,6 +421,20 @@ impl Client {
         self.client.clear()?;
 
         self.current_status()
+    }
+
+    pub fn outputs(&mut self) -> eyre::Result<Option<String>> {
+        let outputs = self.client.outputs()?;
+        let outputs: Vec<Output> =
+            outputs.into_iter().map(|p| Output::from(p.name)).collect();
+        let outputs = Outputs { outputs };
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&outputs)?,
+            OutputFormat::Text => outputs.to_string(),
+        };
+
+        Ok(Some(response))
     }
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
