@@ -1,6 +1,6 @@
 [package]
 name = "mp-cli"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["John Allen <john@threedogconsulting.com"]
 description = "A Music Player Daemon (MPD) CLI client implemented in Rust."
