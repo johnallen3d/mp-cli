@@ -74,6 +74,9 @@ pub(crate) enum Commands {
     /// Shuffle the queue
     #[command()]
     Shuffle,
+    /// List all of the playlists
+    #[command()]
+    Lsplaylists,
     /// Toggle repeat mode or set to provided state
     #[command()]
     Repeat { state: Option<OnOff> },

@@ -193,6 +193,30 @@ impl fmt::Display for Stats {
 }
 
 #[derive(Serialize)]
+pub struct Playlists {
+    playlists: Vec<Playlist>,
+}
+
+#[derive(Serialize)]
+pub struct Playlist(String);
+
+impl From<String> for Playlist {
+    fn from(name: String) -> Self {
+        Playlist(name)
+    }
+}
+
+impl fmt::Display for Playlists {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (index, playlist) in self.playlists.iter().enumerate() {
+            write!(f, "{}={}", index, playlist.0)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Serialize)]
 pub struct Versions {
     mpd: String,
     mp_cli: String,
@@ -397,6 +421,22 @@ impl Client {
         self.client.shuffle(..)?;
 
         self.current_status()
+    }
+
+    pub fn lsplaylists(&mut self) -> eyre::Result<Option<String>> {
+        let playlists = self.client.playlists()?;
+        let playlists: Vec<Playlist> = playlists
+            .into_iter()
+            .map(|p| Playlist::from(p.name))
+            .collect();
+        let playlists = Playlists { playlists };
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&playlists)?,
+            OutputFormat::Text => playlists.to_string(),
+        };
+
+        Ok(Some(response))
     }
 
     pub fn repeat(
