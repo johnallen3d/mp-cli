@@ -92,6 +92,9 @@ pub(crate) enum Commands {
     /// Toggle consume mode or set to provided state
     #[command()]
     Consume { state: Option<OnOff> },
+    /// Toggle consume mode or set to provided state
+    #[command()]
+    Crossfade { seconds: Option<String> },
 
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]

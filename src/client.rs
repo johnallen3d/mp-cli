@@ -533,6 +533,24 @@ impl Client {
         self.current_status()
     }
 
+    pub fn crossfade(
+        &mut self,
+        seconds: Option<String>,
+    ) -> eyre::Result<Option<String>> {
+        let crossfade = match seconds {
+            Some(secs) => secs.parse::<i64>().wrap_err(format!(
+                "\"{secs}\" is not 0 or a positive number"
+            ))?,
+            None => 0,
+        };
+
+        self.client
+            .crossfade(crossfade)
+            .wrap_err(format!("\"{crossfade}\" is too large"))?;
+
+        Ok(Some(format!("crossfade: {crossfade}")))
+    }
+
     pub fn version(&mut self) -> eyre::Result<Option<String>> {
         let mpd = format!(
             "{}.{}.{}",

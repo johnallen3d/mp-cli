@@ -45,6 +45,7 @@ fn main() {
         Some(Commands::Random { state }) => mpd.random(state),
         Some(Commands::Single { state }) => mpd.single(state),
         Some(Commands::Consume { state }) => mpd.consume(state),
+        Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
         Some(Commands::Stats) => mpd.stats(),
