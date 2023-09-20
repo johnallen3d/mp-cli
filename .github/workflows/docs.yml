@@ -9,28 +9,28 @@ jobs:
     permissions:
       contents: write
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
+    steps: []
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      # - name: Install Rust toolchain
+      #   uses: dtolnay/rust-toolchain@stable
 
-      - name: Setup Cache
-        uses: Swatinem/rust-cache@v2
+      # - name: Setup Cache
+      #   uses: Swatinem/rust-cache@v2
 
-      - name: Build crate
-        run: cargo build
+      # - name: Build crate
+      #   run: cargo build
 
-      - name: Update help
-        if: ${{ github.event_name == 'pull_request' }}
-        run: cargo run --quiet -- help > doc/help.txt
+      # - name: Update help
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   run: cargo run --quiet -- help > doc/help.txt
 
-      - name: Commit changes
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'docs: update help text'
-          add: 'doc'
+      # - name: Commit changes
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   uses: EndBug/add-and-commit@v9
+      #   with:
+      #     message: 'docs: update help text'
+      #     add: 'doc'
