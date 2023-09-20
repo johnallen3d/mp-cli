@@ -1,3 +1,4 @@
+#![deny(clippy::pedantic)]
 extern crate chrono;
 extern crate mpd;
 extern crate serde_json;
@@ -49,12 +50,11 @@ fn main() {
         Some(Commands::Stats) => mpd.stats(),
         Some(Commands::Version) => mpd.version(),
 
-        Some(Commands::Status) => mpd.current_status(),
-        None => mpd.current_status(),
+        Some(Commands::Status) | None => mpd.current_status(),
     };
 
     match result {
-        Ok(Some(output)) => println!("{}", output),
+        Ok(Some(output)) => println!("{output}"),
         Ok(None) => (),
         Err(e) => handle_error(e),
     }
@@ -63,7 +63,7 @@ fn main() {
 fn handle_error(error: impl std::fmt::Display) -> ! {
     let err_text = error.to_string();
     if !err_text.is_empty() {
-        println!("{}", err_text);
+        println!("{err_text}");
     }
     std::process::exit(1);
 }
