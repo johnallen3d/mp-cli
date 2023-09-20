@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::fmt;
 use std::time::Duration;
 
@@ -65,8 +66,8 @@ impl From<Status> for Current {
 impl From<Song> for Current {
     fn from(song: Song) -> Self {
         Current {
-            artist: song.0.artist.unwrap_or("".to_string()),
-            title: song.0.title.unwrap_or("".to_string()),
+            artist: song.0.artist.unwrap_or(String::new()),
+            title: song.0.title.unwrap_or(String::new()),
         }
     }
 }
@@ -139,7 +140,7 @@ impl ToString for HumanReadableDuration {
         let minutes = (total_seconds % 3600) / 60;
         let seconds = total_seconds % 60;
 
-        format!("{} days, {}:{:02}:{:02}", days, hours, minutes, seconds)
+        format!("{days} days, {hours}:{minutes:02}:{seconds:02}")
     }
 }
 #[derive(Serialize)]
@@ -155,13 +156,14 @@ struct Stats {
 
 impl Stats {
     pub fn new(stats: mpd::stats::Stats) -> Self {
-        let db_update =
-            match Utc.timestamp_opt(stats.db_update.as_secs() as i64, 0) {
-                chrono::LocalResult::Single(date_time) => {
-                    date_time.format("%a %b %d %H:%M:%S %Y").to_string()
-                }
-                _ => "".to_string(),
-            };
+        let seconds: i64 =
+            stats.db_update.as_secs().try_into().unwrap_or(i64::MAX);
+        let db_update = match Utc.timestamp_opt(seconds, 0) {
+            chrono::LocalResult::Single(date_time) => {
+                date_time.format("%a %b %d %H:%M:%S %Y").to_string()
+            }
+            _ => String::new(),
+        };
 
         Self {
             artists: stats.artists,
@@ -296,12 +298,12 @@ impl Client {
         &mut self,
         position: Option<u32>,
     ) -> eyre::Result<Option<String>> {
-        let postion = match position {
+        let position = match position {
             Some(position) => position,
             None => self.status()?.position,
         };
 
-        self.client.delete(postion)?;
+        self.client.delete(position)?;
 
         self.current_status()
     }
@@ -376,8 +378,7 @@ impl Client {
     pub fn pause_if_playing(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
             mpd::State::Play => self.pause(),
-            mpd::State::Pause => Err(eyre::eyre!("")),
-            mpd::State::Stop => Err(eyre::eyre!("")),
+            mpd::State::Pause | mpd::State::Stop => Err(eyre::eyre!("")),
         }
     }
 
@@ -402,8 +403,7 @@ impl Client {
     pub fn toggle(&mut self) -> eyre::Result<Option<String>> {
         match self.client.status()?.state {
             mpd::State::Play => self.pause(),
-            mpd::State::Pause => self.play(None),
-            mpd::State::Stop => self.play(None),
+            mpd::State::Pause | mpd::State::Stop => self.play(None),
         }
     }
 
@@ -606,11 +606,11 @@ impl Client {
         let artist = current_song
             .as_ref()
             .and_then(|song| song.artist.as_ref())
-            .map_or("".to_string(), ToString::to_string);
+            .map_or(String::new(), ToString::to_string);
         let title = current_song
             .as_ref()
             .and_then(|song| song.title.as_ref())
-            .map_or("".to_string(), ToString::to_string);
+            .map_or(String::new(), ToString::to_string);
 
         let state = match status.state {
             mpd::State::Play => "play",
@@ -645,7 +645,7 @@ impl Client {
         let status = self.status()?;
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&status)?,
-            OutputFormat::Text => format!("{}", status),
+            OutputFormat::Text => format!("{status}"),
         };
 
         Ok(Some(response))

@@ -30,7 +30,7 @@ jobs:
         run: cargo test
 
       - name: Check formatting
-        run: cargo fmt --all --check
+        run: cargo clippy --all -- --deny clippy::pedantic
 
       - name: Run clippy
         run: cargo clippy
