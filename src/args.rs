@@ -80,6 +80,9 @@ pub(crate) enum Commands {
     /// List all of the playlists
     #[command()]
     Lsplaylists,
+    /// List songs in a playlist
+    #[command()]
+    Playlist { name: Option<String> },
     /// Toggle repeat mode or set to provided state
     #[command()]
     Repeat { state: Option<OnOff> },
