@@ -7,6 +7,7 @@ use eyre::WrapErr;
 use serde::Serialize;
 
 use crate::args::{OnOff, OutputFormat};
+use crate::se::serialize_playlists;
 
 #[derive(Serialize)]
 pub struct Status {
@@ -49,6 +50,21 @@ impl fmt::Display for Status {
 struct Song(mpd::song::Song);
 
 #[derive(Serialize)]
+struct TrackList {
+    songs: Vec<Current>,
+}
+
+impl fmt::Display for TrackList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (index, song) in self.songs.iter().enumerate() {
+            write!(f, "{index}={song}")?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Serialize)]
 struct Current {
     artist: String,
     title: String,
@@ -74,7 +90,7 @@ impl From<Song> for Current {
 
 impl fmt::Display for Current {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "artist={}\ntitle={}", self.artist, self.title)
+        writeln!(f, "{} - {}", self.artist, self.title)
     }
 }
 
@@ -196,22 +212,29 @@ impl fmt::Display for Stats {
 
 #[derive(Serialize)]
 pub struct Playlists {
+    #[serde(serialize_with = "serialize_playlists")]
     playlists: Vec<Playlist>,
 }
 
-#[derive(Serialize)]
-pub struct Playlist(String);
+#[derive(Default, Serialize)]
+pub struct Playlist {
+    pub name: String,
+    songs: Vec<Song>,
+}
 
 impl From<String> for Playlist {
     fn from(name: String) -> Self {
-        Playlist(name)
+        Playlist {
+            name,
+            ..Default::default()
+        }
     }
 }
 
 impl fmt::Display for Playlists {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (index, playlist) in self.playlists.iter().enumerate() {
-            write!(f, "{}={}", index, playlist.0)?;
+            write!(f, "{}={}", index, playlist.name)?;
         }
 
         Ok(())
@@ -472,6 +495,29 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&playlists)?,
             OutputFormat::Text => playlists.to_string(),
+        };
+
+        Ok(Some(response))
+    }
+
+    pub fn playlist(
+        &mut self,
+        name: Option<String>,
+    ) -> eyre::Result<Option<String>> {
+        // if given a name list songs in that playlist
+        // if `None` list songs in current playlist
+        let songs = match name {
+            Some(name) => self.client.playlist(&name)?,
+            None => self.client.queue()?,
+        };
+
+        let songs: Vec<Current> =
+            songs.into_iter().map(|s| Current::from(Song(s))).collect();
+        let track_list = TrackList { songs };
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&track_list)?,
+            OutputFormat::Text => track_list.to_string(),
         };
 
         Ok(Some(response))
