@@ -625,6 +625,14 @@ impl Client {
         Ok(Some(response))
     }
 
+    pub fn save(&mut self, name: &str) -> eyre::Result<Option<String>> {
+        self.client
+            .save(name)
+            .wrap_err(format!("Playlist already exists: {name}"))?;
+
+        Ok(None)
+    }
+
     pub fn rm(&mut self, name: &str) -> eyre::Result<Option<String>> {
         self.client
             .pl_remove(name)
