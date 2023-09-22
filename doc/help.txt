@@ -25,6 +25,7 @@ Commands:
   single            Toggle single mode or set to provided state
   consume           Toggle consume mode or set to provided state
   crossfade         Toggle consume mode or set to provided state
+  rm                Remove a playlist
   volume            Set the volume to specified value <num> or increase/decrease it [+-]<num>
   stats             Provide mpd statistics
   version           Provide the mpd version and the mp-cli version
