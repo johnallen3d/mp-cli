@@ -99,6 +99,9 @@ pub(crate) enum Commands {
     #[command()]
     Crossfade { seconds: Option<String> },
 
+    /// Remove a playlist
+    #[command()]
+    Rm { name: String },
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]
     Volume { volume: String },

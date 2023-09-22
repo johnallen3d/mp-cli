@@ -49,6 +49,7 @@ fn main() {
         Some(Commands::Consume { state }) => mpd.consume(state),
         Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
+        Some(Commands::Rm { name }) => mpd.rm(&name),
         Some(Commands::Volume { volume }) => mpd.set_volume(&volume),
         Some(Commands::Stats) => mpd.stats(),
         Some(Commands::Version) => mpd.version(),

@@ -625,6 +625,14 @@ impl Client {
         Ok(Some(response))
     }
 
+    pub fn rm(&mut self, name: &str) -> eyre::Result<Option<String>> {
+        self.client
+            .pl_remove(name)
+            .wrap_err(format!("Unknown playlist: {name}"))?;
+
+        Ok(None)
+    }
+
     //
     // volume related commands
     //
