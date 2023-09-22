@@ -7,6 +7,8 @@ A Music Player Daemon (MPD) CLI client implemented in Rust.
 
 I'm working towards compatibility with [mpc](https://github.com/MusicPlayerDaemon/mpc) over time. See [this tracking issue](https://github.com/johnallen3d/mp-cli/issues/16) for the current status.
 
+Alternatively, see the [help](./doc/help.txt).
+
 ## Installation
 
 At this time it is necessary to compile and install the crate locally. The simplest way to do this is to [install the Rust toolchain](https://rustup.rs/).

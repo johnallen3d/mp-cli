@@ -1,1 +1,42 @@
-place-holder
+Music Player Daemon client written in Rust
+
+Usage: mp-cli [OPTIONS] [COMMAND]
+
+Commands:
+  crop              Remove all but the current song from the queue
+  current           Print the current song
+  del               Print the current song
+  play              Start the player
+  next              Next song in the queue
+  prev              Previous song in the queue
+  pause             Pause the player
+  pause-if-playing  Pause the player if it is playing
+  cdprev            CD player like previous song
+  toggle            Toggle play/pause
+  stop              Stop the player
+  clear             Clear the current playlist
+  outputs           List current outputs
+  queued            Display the next song in the queue
+  shuffle           Shuffle the queue
+  lsplaylists       List all of the playlists
+  playlist          List songs in a playlist
+  repeat            Toggle repeat mode or set to provided state
+  random            Toggle random mode or set to provided state
+  single            Toggle single mode or set to provided state
+  consume           Toggle consume mode or set to provided state
+  crossfade         Toggle consume mode or set to provided state
+  volume            Set the volume to specified value <num> or increase/decrease it [+-]<num>
+  stats             Provide mpd statistics
+  version           Provide the mpd version and the mp-cli version
+  status            Get the current status of the player
+  help              Print this message or the help of the given subcommand(s)
+
+Options:
+      --format <FORMAT>
+          Set output format [default: json] [possible values: text, json]
+      --bind-to-address <BIND_TO_ADDRESS>
+          Set the ip address the mpd server is listening on [default: 127.0.0.1]
+      --port <PORT>
+          Set the port the mpd server is listening on [default: 6600]
+  -h, --help
+          Print help
