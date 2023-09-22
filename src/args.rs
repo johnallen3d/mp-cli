@@ -99,6 +99,9 @@ pub(crate) enum Commands {
     #[command()]
     Crossfade { seconds: Option<String> },
 
+    /// Save queue to a playlist
+    #[command()]
+    Save { name: String },
     /// Remove a playlist
     #[command()]
     Rm { name: String },
