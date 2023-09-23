@@ -79,3 +79,33 @@ impl fmt::Display for Outputs {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_stats_creation() {
+        let mpd_stats = mpd::stats::Stats {
+            artists: 100,
+            albums: 200,
+            songs: 300,
+            uptime: Duration::new(1000, 0),
+            playtime: Duration::new(5000, 0),
+            db_playtime: Duration::new(6000, 0),
+            db_update: Duration::new(1_000_000, 0),
+        };
+
+        let stats = Stats::new(mpd_stats);
+
+        assert_eq!(stats.artists, 100);
+        assert_eq!(stats.albums, 200);
+        assert_eq!(stats.songs, 300);
+        assert_eq!(stats.uptime, "0 days, 0:16:40");
+        assert_eq!(stats.playtime, "0 days, 1:23:20");
+        assert_eq!(stats.db_playtime, "0 days, 1:40:00");
+
+        assert!(!stats.db_update.is_empty());
+    }
+}

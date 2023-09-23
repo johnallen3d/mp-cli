@@ -68,3 +68,45 @@ impl From<Option<(Duration, Duration)>> for Track {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_time_from_duration() {
+        let duration = Duration::from_secs(3661); // 1 hour, 1 minute, 1 second
+        let time = Time::from(duration);
+        assert_eq!(time.0, "61:01");
+    }
+
+    #[test]
+    fn test_time_from_u32() {
+        let duration: u32 = 3661; // 1 hour, 1 minute, 1 second
+        let time = Time::from(duration);
+        assert_eq!(time.0, "61:01");
+    }
+
+    #[test]
+    fn test_time_display() {
+        let time = Time("61:01".to_string());
+        assert_eq!(format!("{time}"), "61:01");
+    }
+
+    #[test]
+    fn test_human_readable_duration_to_string() {
+        let duration = Duration::from_secs(90061); // 1 day, 1 hour, 1 minute, 1 second
+        let human_duration = HumanReadableDuration::from(duration);
+        assert_eq!(human_duration.to_string(), "1 days, 1:01:01");
+    }
+
+    #[test]
+    fn test_track_from_option() {
+        let elapsed = Duration::from_secs(60);
+        let total = Duration::from_secs(300);
+        let track = Track::from(Some((elapsed, total)));
+        assert_eq!(track.elapsed.0, "01:00");
+        assert_eq!(track.total.0, "05:00");
+    }
+}

@@ -157,3 +157,62 @@ impl Finder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File as StdFile;
+    use std::io::Write;
+    use std::path::PathBuf;
+    use tempdir::TempDir;
+
+    fn create_temp_music_files(temp_dir: &Path) {
+        let music_files = ["song1.mp3", "song2.flac", "song3.ogg"];
+        for music_file in &music_files {
+            let file_path = temp_dir.join(music_file);
+            let mut temp_file = StdFile::create(file_path).unwrap();
+            temp_file.write_all(b"dummy content").unwrap();
+        }
+    }
+
+    #[test]
+    fn test_is_music_file() {
+        let valid_file = Path::new("test.mp3");
+        let invalid_file = Path::new("test.txt");
+
+        assert!(Finder::is_music_file(valid_file));
+        assert!(!Finder::is_music_file(invalid_file));
+    }
+
+    #[test]
+    fn test_find() {
+        let temp_dir = TempDir::new("music").unwrap();
+        create_temp_music_files(temp_dir.path());
+
+        let music_dir_str = temp_dir.path().to_str().unwrap().to_string();
+        let mut finder = Finder::new(music_dir_str.clone());
+
+        let result = finder.find(&PathBuf::from(&music_dir_str));
+
+        assert!(result.is_ok());
+        assert_eq!(finder.found.len(), 3); // Should find 3 music files
+    }
+
+    #[test]
+    fn test_file_for() {
+        let temp_dir = TempDir::new("music").unwrap();
+        let music_file = "song.mp3";
+        let file_path = temp_dir.path().join(music_file);
+
+        let mut temp_file = StdFile::create(file_path.clone()).unwrap();
+        temp_file.write_all(b"dummy content").unwrap();
+
+        let music_dir_str = temp_dir.path().to_str().unwrap().to_string();
+        let finder = Finder::new(music_dir_str);
+
+        let file = finder.file_for(&file_path).unwrap();
+
+        assert_eq!(file.full_path, file_path.to_str().unwrap());
+        assert_eq!(file.relative_path, music_file);
+    }
+}
