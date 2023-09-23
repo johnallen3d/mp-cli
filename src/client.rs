@@ -1,5 +1,6 @@
 use std::fmt;
 use std::path::Path;
+use std::path::PathBuf;
 use std::time::Duration;
 
 use eyre::WrapErr;
@@ -17,7 +18,6 @@ use crate::{
     song::TrackList,
     stats::Stats,
     status::Status,
-    time::Track,
 };
 
 #[derive(Serialize)]
@@ -58,7 +58,11 @@ impl Client {
         let absolute_path = if path.starts_with(&music_dir) {
             path.to_string()
         } else {
-            format!("{music_dir}/{path}")
+            PathBuf::from(&music_dir)
+                .join(path)
+                .to_str()
+                .unwrap()
+                .to_string()
         };
 
         let mut finder = Finder::new(music_dir);
@@ -488,7 +492,7 @@ impl Client {
             Some(song) => song.pos,
             None => 0,
         };
-        let time = Track::from(status.time);
+        let time = crate::time::Track::from(status.time);
 
         Ok(Status {
             volume,
