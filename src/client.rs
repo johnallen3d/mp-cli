@@ -1,269 +1,24 @@
-use std::convert::TryInto;
 use std::fmt;
+use std::path::Path;
+use std::path::PathBuf;
 use std::time::Duration;
 
-use chrono::{TimeZone, Utc};
 use eyre::WrapErr;
 use serde::Serialize;
 
-use crate::args::{OnOff, OutputFormat};
-use crate::se::serialize_playlists;
-
-#[derive(Serialize)]
-pub struct Status {
-    volume: String,
-    state: String,
-    artist: String,
-    title: String,
-    position: u32,
-    queue_count: u32,
-    elapsed: Time,
-    track_length: Time,
-    repeat: OnOff,
-    random: OnOff,
-    single: OnOff,
-    consume: OnOff,
-}
-
-impl fmt::Display for Status {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "volume={}\nstate={}\nartist={}\ntitle={}\nposition={}\nqueue_count={}\nelapsed={}\ntrack_length={}\nrepeat={}\nrandom={}\nsingle={}\nconsume={}",
-            self.volume,
-            self.state,
-            self.artist,
-            self.title,
-            self.position,
-            self.queue_count,
-            self.elapsed,
-            self.track_length,
-            self.repeat,
-            self.random,
-            self.single,
-            self.consume,
-        )
-    }
-}
-
-#[derive(Serialize)]
-struct Song(mpd::song::Song);
-
-#[derive(Serialize)]
-struct TrackList {
-    songs: Vec<Current>,
-}
-
-impl fmt::Display for TrackList {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, song) in self.songs.iter().enumerate() {
-            write!(f, "{index}={song}")?;
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Serialize)]
-struct Current {
-    artist: String,
-    title: String,
-}
-
-impl From<Status> for Current {
-    fn from(status: Status) -> Self {
-        Current {
-            artist: status.artist,
-            title: status.title,
-        }
-    }
-}
-
-impl From<Song> for Current {
-    fn from(song: Song) -> Self {
-        Current {
-            artist: song.0.artist.unwrap_or(String::new()),
-            title: song.0.title.unwrap_or(String::new()),
-        }
-    }
-}
-
-impl fmt::Display for Current {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{} - {}", self.artist, self.title)
-    }
-}
-
-#[derive(Serialize)]
-pub struct TrackTime {
-    elapsed: Time,
-    total: Time,
-}
-
-impl From<Option<(Duration, Duration)>> for TrackTime {
-    fn from(time: Option<(Duration, Duration)>) -> Self {
-        match time {
-            Some((elapsed, total)) => TrackTime {
-                elapsed: Time::from(elapsed),
-                total: Time::from(total),
-            },
-            None => TrackTime {
-                elapsed: Time::from(0),
-                total: Time::from(0),
-            },
-        }
-    }
-}
-
-#[derive(Serialize)]
-pub struct Time(String);
-
-impl From<Duration> for Time {
-    fn from(duration: Duration) -> Self {
-        Time(format!(
-            "{:02}:{:02}",
-            duration.as_secs() / 60,
-            duration.as_secs() % 60
-        ))
-    }
-}
-
-impl From<u32> for Time {
-    fn from(duration: u32) -> Self {
-        Time(format!("{:02}:{:02}", duration / 60, duration % 60))
-    }
-}
-
-impl fmt::Display for Time {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-struct HumanReadableDuration(core::time::Duration);
-
-impl From<Duration> for HumanReadableDuration {
-    fn from(duration: Duration) -> Self {
-        HumanReadableDuration(duration)
-    }
-}
-
-impl ToString for HumanReadableDuration {
-    fn to_string(&self) -> String {
-        let total_seconds = self.0.as_secs();
-        let days = total_seconds / 86400;
-        let hours = (total_seconds % 86400) / 3600;
-        let minutes = (total_seconds % 3600) / 60;
-        let seconds = total_seconds % 60;
-
-        format!("{days} days, {hours}:{minutes:02}:{seconds:02}")
-    }
-}
-#[derive(Serialize)]
-struct Stats {
-    artists: u32,
-    albums: u32,
-    songs: u32,
-    uptime: String,
-    playtime: String,
-    db_playtime: String,
-    db_update: String,
-}
-
-impl Stats {
-    pub fn new(stats: mpd::stats::Stats) -> Self {
-        let seconds: i64 =
-            stats.db_update.as_secs().try_into().unwrap_or(i64::MAX);
-        let db_update = match Utc.timestamp_opt(seconds, 0) {
-            chrono::LocalResult::Single(date_time) => {
-                date_time.format("%a %b %d %H:%M:%S %Y").to_string()
-            }
-            _ => String::new(),
-        };
-
-        Self {
-            artists: stats.artists,
-            albums: stats.albums,
-            songs: stats.songs,
-            uptime: HumanReadableDuration::from(stats.uptime).to_string(),
-            playtime: HumanReadableDuration::from(stats.playtime).to_string(),
-            db_playtime: HumanReadableDuration::from(stats.db_playtime)
-                .to_string(),
-            db_update,
-        }
-    }
-}
-
-impl fmt::Display for Stats {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "artists={}\nalbums={}\nsongs={}\nuptime={}\nplaytime={}\ndb_playtime={}\ndb_update={}",
-            self.artists,
-            self.albums,
-            self.songs,
-            self.uptime,
-            self.playtime,
-            self.db_playtime,
-            self.db_update,
-            )
-    }
-}
-
-#[derive(Serialize)]
-pub struct Playlists {
-    #[serde(serialize_with = "serialize_playlists")]
-    playlists: Vec<Playlist>,
-}
-
-#[derive(Default, Serialize)]
-pub struct Playlist {
-    pub name: String,
-    songs: Vec<Song>,
-}
-
-impl From<String> for Playlist {
-    fn from(name: String) -> Self {
-        Playlist {
-            name,
-            ..Default::default()
-        }
-    }
-}
-
-impl fmt::Display for Playlists {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, playlist) in self.playlists.iter().enumerate() {
-            write!(f, "{}={}", index, playlist.name)?;
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Serialize)]
-pub struct Outputs {
-    outputs: Vec<Output>,
-}
-
-#[derive(Serialize)]
-pub struct Output(String);
-
-impl From<String> for Output {
-    fn from(name: String) -> Self {
-        Output(name)
-    }
-}
-
-impl fmt::Display for Outputs {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, output) in self.outputs.iter().enumerate() {
-            write!(f, "{}={}", index, output.0)?;
-        }
-
-        Ok(())
-    }
-}
+use crate::song::Finder;
+use crate::stats::Output;
+use crate::stats::Outputs;
+use crate::{
+    args::{OnOff, OutputFormat},
+    song::Current,
+    song::Playlist,
+    song::Playlists,
+    song::Song,
+    song::TrackList,
+    stats::Stats,
+    status::Status,
+};
 
 #[derive(Serialize)]
 pub struct Versions {
@@ -288,7 +43,6 @@ impl Client {
         port: &str,
         format: OutputFormat,
     ) -> eyre::Result<Client> {
-        // TODO: read connection details from mpd.conf
         let client = mpd::Client::connect(format!("{bind_to_address}:{port}"))
             .wrap_err("Error connecting to mpd server".to_string())?;
 
@@ -298,6 +52,37 @@ impl Client {
     //
     // queue related commands
     //
+    pub fn add(&mut self, path: &str) -> eyre::Result<Option<String>> {
+        let music_dir = self.client.music_directory()?;
+
+        let absolute_path = if path.starts_with(&music_dir) {
+            path.to_string()
+        } else {
+            PathBuf::from(&music_dir)
+                .join(path)
+                .to_str()
+                .unwrap()
+                .to_string()
+        };
+
+        let mut finder = Finder::new(music_dir);
+
+        finder.find(Path::new(Path::new(&absolute_path)))?;
+
+        for file in finder.found {
+            let song = crate::mpd::song::Song {
+                file: file.relative_path,
+                ..Default::default()
+            };
+
+            self.client
+                .push(song.clone())
+                .wrap_err(format!("unkown or inalid path: {}", song.file))?;
+        }
+
+        Ok(None)
+    }
+
     pub fn crop(&mut self) -> eyre::Result<Option<String>> {
         // determine current song position
         // remove all songs before current song
@@ -465,7 +250,9 @@ impl Client {
             self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
         {
             // safe to unwrap because we know we have a song
-            let current = Current::from(Song(song.clone()));
+            let current = Current::from(Song {
+                inner: song.clone(),
+            });
 
             let response = match self.format {
                 OutputFormat::Json => serde_json::to_string(&current)?,
@@ -511,8 +298,10 @@ impl Client {
             None => self.client.queue()?,
         };
 
-        let songs: Vec<Current> =
-            songs.into_iter().map(|s| Current::from(Song(s))).collect();
+        let songs: Vec<Current> = songs
+            .into_iter()
+            .map(|s| Current::from(Song { inner: s }))
+            .collect();
         let track_list = TrackList { songs };
 
         let response = match self.format {
@@ -703,7 +492,7 @@ impl Client {
             Some(song) => song.pos,
             None => 0,
         };
-        let time = TrackTime::from(status.time);
+        let time = crate::time::Track::from(status.time);
 
         Ok(Status {
             volume,

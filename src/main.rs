@@ -8,6 +8,10 @@ use clap::Parser;
 mod args;
 mod client;
 mod se;
+mod song;
+mod stats;
+mod status;
+mod time;
 
 use args::{Cli, Commands};
 
@@ -25,6 +29,7 @@ fn main() {
     };
 
     let result = match args.command {
+        Some(Commands::Add { path }) => mpd.add(&path),
         Some(Commands::Crop) => mpd.crop(),
         Some(Commands::Del { position }) => mpd.del(position),
         Some(Commands::Current) => mpd.current(),

@@ -1,7 +1,7 @@
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 
-use crate::client::Playlist;
+use crate::song::Playlist;
 
 pub fn serialize_playlists<S>(
     playlists: &Vec<Playlist>,
