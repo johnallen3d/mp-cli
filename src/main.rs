@@ -8,6 +8,10 @@ use clap::Parser;
 mod args;
 mod client;
 mod se;
+mod song;
+mod stats;
+mod status;
+mod time;
 
 use args::{Cli, Commands};
 
