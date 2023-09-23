@@ -1,4 +1,6 @@
 #![deny(clippy::pedantic)]
+use std::io::BufRead;
+
 extern crate chrono;
 extern crate mpd;
 extern crate serde_json;
@@ -29,7 +31,9 @@ fn main() {
     };
 
     let result = match args.command {
-        Some(Commands::Add { path }) => mpd.add(&path),
+        Some(Commands::Add { path }) => {
+            mpd.add(&input_or_stdin(path, std::io::stdin().lock()))
+        }
         Some(Commands::Crop) => mpd.crop(),
         Some(Commands::Del { position }) => mpd.del(position),
         Some(Commands::Current) => mpd.current(),
@@ -76,4 +80,42 @@ fn handle_error(error: impl std::fmt::Display) -> ! {
         println!("{err_text}");
     }
     std::process::exit(1);
+}
+
+fn input_or_stdin<R: BufRead>(path: Option<String>, reader: R) -> String {
+    if let Some(p) = path {
+        return p;
+    }
+
+    let mut buffer = String::new();
+    let mut reader = reader;
+
+    reader
+        .read_line(&mut buffer)
+        .expect("error reading from input");
+
+    buffer.trim().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_input_or_stdin_with_path() {
+        let path = Some("some_path".to_string());
+        let cursor = Cursor::new("not_used");
+
+        let result = input_or_stdin(path, cursor);
+        assert_eq!(result, "some_path");
+    }
+
+    #[test]
+    fn test_input_or_stdin_with_stdin() {
+        let cursor = Cursor::new("from_stdin\n");
+
+        let result = input_or_stdin(None, cursor);
+        assert_eq!(result, "from_stdin");
+    }
 }
