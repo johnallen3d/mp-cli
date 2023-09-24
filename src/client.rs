@@ -245,8 +245,9 @@ impl Client {
         Ok(Some(response))
     }
 
-    pub fn enable(
+    fn enable_or_disable(
         &mut self,
+        enable: bool,
         args: Vec<String>,
     ) -> eyre::Result<Option<String>> {
         let mut only = false;
@@ -263,7 +264,7 @@ impl Client {
         if only {
             // first disable all outputs
             for output in self.client.outputs()? {
-                self.client.output(output, false)?;
+                self.client.output(output, enable)?;
             }
         }
 
@@ -279,10 +280,24 @@ impl Client {
                     .id
             };
 
-            self.client.out_enable(id)?;
+            self.client.output(id, enable)?;
         }
 
         self.outputs()
+    }
+
+    pub fn enable(
+        &mut self,
+        args: Vec<String>,
+    ) -> eyre::Result<Option<String>> {
+        self.enable_or_disable(true, args)
+    }
+
+    pub fn disable(
+        &mut self,
+        args: Vec<String>,
+    ) -> eyre::Result<Option<String>> {
+        self.enable_or_disable(false, args)
     }
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
