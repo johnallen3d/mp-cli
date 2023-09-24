@@ -6,16 +6,17 @@ use std::time::Duration;
 use eyre::WrapErr;
 use serde::Serialize;
 
-use crate::song::Finder;
-use crate::stats::Output;
-use crate::stats::Outputs;
 use crate::{
     args::{OnOff, OutputFormat},
     song::Current,
+    song::Files,
+    song::Finder,
     song::Playlist,
     song::Playlists,
     song::Song,
     song::TrackList,
+    stats::Output,
+    stats::Outputs,
     stats::Stats,
     status::Status,
 };
@@ -385,6 +386,34 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&track_list)?,
             OutputFormat::Text => track_list.to_string(),
+        };
+
+        Ok(Some(response))
+    }
+
+    pub fn listall(
+        &mut self,
+        file: Option<&str>,
+    ) -> eyre::Result<Option<String>> {
+        let all_files = Files::from(self.client.listall()?);
+
+        let songs = if let Some(ref file) = file {
+            // TODO: this is inefficient but it's the only way I see at the moment
+            all_files
+                .files
+                .iter()
+                .filter(|song| song.starts_with(file))
+                .cloned()
+                .collect::<Vec<_>>()
+        } else {
+            all_files.files.clone()
+        };
+
+        let files = Files::from(songs);
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&files)?,
+            OutputFormat::Text => files.to_string(),
         };
 
         Ok(Some(response))

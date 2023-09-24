@@ -21,6 +21,35 @@ pub struct Current {
 }
 
 #[derive(Serialize)]
+pub struct Files {
+    pub files: Vec<String>,
+}
+
+impl From<Vec<mpd::song::Song>> for Files {
+    fn from(songs: Vec<mpd::song::Song>) -> Self {
+        Files {
+            files: songs.into_iter().map(|s| s.file).collect(),
+        }
+    }
+}
+
+impl From<Vec<String>> for Files {
+    fn from(songs: Vec<String>) -> Self {
+        Files { files: songs }
+    }
+}
+
+impl fmt::Display for Files {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (index, file) in self.files.iter().enumerate() {
+            writeln!(f, "{index}={file}")?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Serialize)]
 pub struct TrackList {
     pub songs: Vec<Current>,
 }

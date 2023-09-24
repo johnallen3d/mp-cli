@@ -98,6 +98,9 @@ pub(crate) enum Commands {
     /// List songs in a playlist
     #[command()]
     Playlist { name: Option<String> },
+    /// List all songs in the music directory
+    #[command()]
+    Listall { file: Option<String> },
     /// Toggle repeat mode or set to provided state
     #[command()]
     Repeat { state: Option<OnOff> },
