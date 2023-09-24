@@ -55,6 +55,7 @@ fn main() {
         Some(Commands::Shuffle) => mpd.shuffle(),
         Some(Commands::Lsplaylists) => mpd.lsplaylists(),
         Some(Commands::Playlist { name }) => mpd.playlist(name),
+        Some(Commands::Listall { file }) => mpd.listall(file.as_deref()),
         Some(Commands::Repeat { state }) => mpd.repeat(state),
         Some(Commands::Random { state }) => mpd.random(state),
         Some(Commands::Single { state }) => mpd.single(state),
