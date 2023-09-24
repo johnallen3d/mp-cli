@@ -245,6 +245,21 @@ impl Client {
         Ok(Some(response))
     }
 
+    fn output_for(&mut self, name_or_id: &str) -> Result<u32, eyre::Error> {
+        let id: u32 = if let Ok(parsed_id) = name_or_id.parse::<u32>() {
+            parsed_id
+        } else {
+            self.client
+                .outputs()?
+                .iter()
+                .find(|&o| o.name == name_or_id)
+                .ok_or_else(|| eyre::eyre!("unknown output: {}", name_or_id))?
+                .id
+        };
+
+        Ok(id)
+    }
+
     fn enable_or_disable(
         &mut self,
         enable: bool,
@@ -268,17 +283,8 @@ impl Client {
             }
         }
 
-        for name in outputs {
-            let id: u32 = if let Ok(parsed_id) = name.parse::<u32>() {
-                parsed_id
-            } else {
-                self.client
-                    .outputs()?
-                    .iter()
-                    .find(|&o| o.name == name)
-                    .ok_or_else(|| eyre::eyre!("unknown output: {}", name))?
-                    .id
-            };
+        for name_or_id in outputs {
+            let id = self.output_for(&name_or_id)?;
 
             self.client.output(id, enable)?;
         }
@@ -298,6 +304,23 @@ impl Client {
         args: Vec<String>,
     ) -> eyre::Result<Option<String>> {
         self.enable_or_disable(false, args)
+    }
+
+    pub fn toggle_output(
+        &mut self,
+        args: Vec<String>,
+    ) -> eyre::Result<Option<String>> {
+        if args.is_empty() {
+            return Err(eyre::eyre!("no outputs given"));
+        }
+
+        for name_or_id in args {
+            let id = self.output_for(&name_or_id)?;
+
+            self.client.out_toggle(id)?;
+        }
+
+        self.outputs()
     }
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
