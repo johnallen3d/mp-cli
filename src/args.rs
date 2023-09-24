@@ -82,6 +82,10 @@ pub(crate) enum Commands {
     /// example: `mp-cli disable [only] <output # or name> [...]`
     #[command()]
     Disable { args: Vec<String> },
+    /// Toggle the given output(s).
+    /// example: `mp-cli toggleoutput <output # or name> [...]`
+    #[command()]
+    Toggleoutput { args: Vec<String> },
     /// Display the next song in the queue
     #[command()]
     Queued,
