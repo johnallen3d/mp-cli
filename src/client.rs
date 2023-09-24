@@ -323,6 +323,23 @@ impl Client {
         self.outputs()
     }
 
+    pub fn output_set(
+        &mut self,
+        mut args: Vec<String>,
+    ) -> eyre::Result<Option<String>> {
+        if args.is_empty() {
+            return Err(eyre::eyre!("no outputs given"));
+        }
+
+        let name_or_id = args.pop().ok_or(eyre::eyre!("no outputs given"))?;
+        let output = self.output_for(&name_or_id)?;
+
+        // TODO: this doesn't appear to be available in rust-mpd
+        // self.client.out_set(id)
+
+        Ok(None)
+    }
+
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
         if let Some(song) =
             self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
