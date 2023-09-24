@@ -48,6 +48,7 @@ fn main() {
 
         Some(Commands::Clear) => mpd.clear(),
         Some(Commands::Outputs) => mpd.outputs(),
+        Some(Commands::Enable { args }) => mpd.enable(args),
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
         Some(Commands::Lsplaylists) => mpd.lsplaylists(),

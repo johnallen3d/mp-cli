@@ -234,7 +234,7 @@ impl Client {
     pub fn outputs(&mut self) -> eyre::Result<Option<String>> {
         let outputs = self.client.outputs()?;
         let outputs: Vec<Output> =
-            outputs.into_iter().map(|p| Output::from(p.name)).collect();
+            outputs.into_iter().map(Output::from).collect();
         let outputs = Outputs { outputs };
 
         let response = match self.format {
@@ -243,6 +243,46 @@ impl Client {
         };
 
         Ok(Some(response))
+    }
+
+    pub fn enable(
+        &mut self,
+        args: Vec<String>,
+    ) -> eyre::Result<Option<String>> {
+        let mut only = false;
+        let mut outputs = Vec::new();
+
+        for arg in args {
+            if arg == "only" {
+                only = true;
+            } else {
+                outputs.push(arg);
+            }
+        }
+
+        if only {
+            // first disable all outputs
+            for output in self.client.outputs()? {
+                self.client.output(output, false)?;
+            }
+        }
+
+        for name in outputs {
+            let id: u32 = if let Ok(parsed_id) = name.parse::<u32>() {
+                parsed_id
+            } else {
+                self.client
+                    .outputs()?
+                    .iter()
+                    .find(|&o| o.name == name)
+                    .ok_or_else(|| eyre::eyre!("unknown output: {}", name))?
+                    .id
+            };
+
+            self.client.out_enable(id)?;
+        }
+
+        self.outputs()
     }
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {

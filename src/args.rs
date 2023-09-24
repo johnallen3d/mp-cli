@@ -74,6 +74,10 @@ pub(crate) enum Commands {
     /// List current outputs
     #[command()]
     Outputs,
+    /// Enable the given output(s).
+    /// example: `mp-cli enable [only] <output # or name> [...]`
+    #[command()]
+    Enable { args: Vec<String> },
     /// Display the next song in the queue
     #[command()]
     Queued,

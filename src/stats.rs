@@ -62,18 +62,52 @@ pub struct Outputs {
 }
 
 #[derive(Serialize)]
-pub struct Output(String);
+pub struct Output {
+    pub id: u32,
+    pub name: String,
+    pub enabled: Enabled,
+}
 
-impl From<String> for Output {
-    fn from(name: String) -> Self {
-        Output(name)
+#[derive(Serialize)]
+#[serde(rename_all(serialize = "lowercase"))]
+pub enum Enabled {
+    Enabled,
+    Disabled,
+}
+
+impl From<bool> for Enabled {
+    fn from(value: bool) -> Self {
+        if value {
+            Enabled::Enabled
+        } else {
+            Enabled::Disabled
+        }
+    }
+}
+
+impl fmt::Display for Enabled {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Enabled::Enabled => write!(f, "enabled"),
+            Enabled::Disabled => write!(f, "disabled"),
+        }
+    }
+}
+
+impl From<mpd::output::Output> for Output {
+    fn from(inner: mpd::output::Output) -> Self {
+        Output {
+            id: inner.id,
+            name: inner.name,
+            enabled: Enabled::from(inner.enabled),
+        }
     }
 }
 
 impl fmt::Display for Outputs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, output) in self.outputs.iter().enumerate() {
-            write!(f, "{}={}", index, output.0)?;
+        for output in &self.outputs {
+            write!(f, "{}={} ({})", output.id, output.name, output.enabled)?;
         }
 
         Ok(())
