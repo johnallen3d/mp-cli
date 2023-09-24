@@ -26,7 +26,7 @@ pub(crate) enum Commands {
     //
     /// Add a song to the queue at the given path (or dir '/')
     #[command()]
-    Add { path: String },
+    Add { path: Option<String> },
     /// Remove all but the current song from the queue
     #[command()]
     Crop,
