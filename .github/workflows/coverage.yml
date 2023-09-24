@@ -32,4 +32,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Report test coverage
-        run: cargo tarpaulin --engine llvm --follow-exec --post-test-delay 10 --exclude-files src/client.rs --coveralls ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
+          cargo tarpaulin \
+            --engine llvm \
+            --follow-exec \
+            --post-test-delay 10 \
+            --exclude-files src/{args,client}.rs \
+            --coveralls ${{ secrets.COVERALLS_REPO_TOKEN }}
