@@ -21,27 +21,27 @@ pub struct Current {
 }
 
 #[derive(Serialize)]
-pub struct Files {
-    pub files: Vec<String>,
+pub struct Listing {
+    pub listing: Vec<String>,
 }
 
-impl From<Vec<mpd::song::Song>> for Files {
+impl From<Vec<mpd::song::Song>> for Listing {
     fn from(songs: Vec<mpd::song::Song>) -> Self {
-        Files {
-            files: songs.into_iter().map(|s| s.file).collect(),
+        Listing {
+            listing: songs.into_iter().map(|s| s.file).collect(),
         }
     }
 }
 
-impl From<Vec<String>> for Files {
+impl From<Vec<String>> for Listing {
     fn from(songs: Vec<String>) -> Self {
-        Files { files: songs }
+        Listing { listing: songs }
     }
 }
 
-impl fmt::Display for Files {
+impl fmt::Display for Listing {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, file) in self.files.iter().enumerate() {
+        for (index, file) in self.listing.iter().enumerate() {
             writeln!(f, "{index}={file}")?;
         }
 

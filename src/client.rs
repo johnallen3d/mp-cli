@@ -9,8 +9,8 @@ use serde::Serialize;
 use crate::{
     args::{OnOff, OutputFormat},
     song::Current,
-    song::Files,
     song::Finder,
+    song::Listing,
     song::Playlist,
     song::Playlists,
     song::Song,
@@ -395,25 +395,60 @@ impl Client {
         &mut self,
         file: Option<&str>,
     ) -> eyre::Result<Option<String>> {
-        let all_files = Files::from(self.client.listall()?);
+        let all_files = Listing::from(self.client.listall()?);
 
         let songs = if let Some(ref file) = file {
             // TODO: this is inefficient but it's the only way I see at the moment
             all_files
-                .files
+                .listing
                 .iter()
                 .filter(|song| song.starts_with(file))
                 .cloned()
                 .collect::<Vec<_>>()
         } else {
-            all_files.files.clone()
+            all_files.listing.clone()
         };
 
-        let files = Files::from(songs);
+        let files = Listing::from(songs);
 
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
             OutputFormat::Text => files.to_string(),
+        };
+
+        Ok(Some(response))
+    }
+
+    pub fn ls(
+        &mut self,
+        directory: Option<&str>,
+    ) -> eyre::Result<Option<String>> {
+        let directory = directory.unwrap_or("");
+        let listing = self.client.listfiles(directory)?;
+        let filter_for = if let Some(entry) = listing.first() {
+            entry.0.as_str()
+        } else {
+            "directory"
+        };
+
+        let results = Listing::from(
+            listing
+                .clone()
+                .into_iter()
+                .filter(|(key, _)| key == filter_for)
+                .map(|(_, value)| {
+                    PathBuf::from(&directory)
+                        .join(value)
+                        .to_str()
+                        .unwrap()
+                        .to_string()
+                })
+                .collect::<Vec<String>>(),
+        );
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&results)?,
+            OutputFormat::Text => results.to_string(),
         };
 
         Ok(Some(response))
