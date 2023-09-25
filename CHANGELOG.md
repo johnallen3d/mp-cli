@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/johnallen3d/mp-cli/compare/v0.1.2...v0.1.3) - 2023-09-25
+
+### Added
+- add `ls` command ([#56](https://github.com/johnallen3d/mp-cli/pull/56))
+- add `listall` command ([#55](https://github.com/johnallen3d/mp-cli/pull/55))
+- add `toggleoutput` command ([#52](https://github.com/johnallen3d/mp-cli/pull/52))
+- add `disable` command ([#51](https://github.com/johnallen3d/mp-cli/pull/51))
+- add `enable` command ([#50](https://github.com/johnallen3d/mp-cli/pull/50))
+- add support for `stdin` for `add` ([#49](https://github.com/johnallen3d/mp-cli/pull/49))
+- add `add` command ([#35](https://github.com/johnallen3d/mp-cli/pull/35))
+- add `save` command ([#48](https://github.com/johnallen3d/mp-cli/pull/48))
+- add `rm` command ([#47](https://github.com/johnallen3d/mp-cli/pull/47))
+- add `playlst` command ([#45](https://github.com/johnallen3d/mp-cli/pull/45))
+- add `crossfade` command ([#44](https://github.com/johnallen3d/mp-cli/pull/44))
+- add auto help txt updates
+
+### Other
+- exclude args from coverage checks ([#54](https://github.com/johnallen3d/mp-cli/pull/54))
+- update help text ([#46](https://github.com/johnallen3d/mp-cli/pull/46))
+- make clippy enforce pedantic lints ([#42](https://github.com/johnallen3d/mp-cli/pull/42))
+- disable `docs` workflow ([#43](https://github.com/johnallen3d/mp-cli/pull/43))
+- *(deps)* bump clap from 4.4.3 to 4.4.4 ([#41](https://github.com/johnallen3d/mp-cli/pull/41))
+
 ## [0.1.2](https://github.com/johnallen3d/mp-cli/compare/v0.1.1...v0.1.2) - 2023-09-18
 
 ### Added
