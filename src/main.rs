@@ -54,6 +54,7 @@ fn main() {
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
         Some(Commands::Lsplaylists) => mpd.lsplaylists(),
+        Some(Commands::Load { name, range }) => mpd.load(&name, range),
         Some(Commands::Playlist { name }) => mpd.playlist(name),
         Some(Commands::Listall { file }) => mpd.listall(file.as_deref()),
         Some(Commands::Ls { directory }) => mpd.ls(directory.as_deref()),

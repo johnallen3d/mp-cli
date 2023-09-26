@@ -95,6 +95,9 @@ pub(crate) enum Commands {
     /// List all of the playlists
     #[command()]
     Lsplaylists,
+    /// Load a playlist into the queue (optionally provide a range)
+    #[command()]
+    Load { name: String, range: Option<String> },
     /// List songs in a playlist
     #[command()]
     Playlist { name: Option<String> },
