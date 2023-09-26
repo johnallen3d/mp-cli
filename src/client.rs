@@ -71,7 +71,7 @@ impl Client {
         finder.find(Path::new(Path::new(&absolute_path)))?;
 
         for file in finder.found {
-            let song = crate::mpd::song::Song {
+            let song = mpd::song::Song {
                 file: file.relative_path,
                 ..Default::default()
             };
@@ -402,6 +402,43 @@ impl Client {
         Ok(Some(format!("loading: {name}")))
     }
 
+    /// Retrieves a list of song files from a given directory
+    fn files_for(
+        &mut self,
+        file: Option<&str>,
+    ) -> Result<Vec<String>, eyre::Error> {
+        let all_files = Listing::from(self.client.listall()?);
+
+        let files = if let Some(ref file) = file {
+            // TODO: this is inefficient but it's the only way I see at the moment
+            all_files
+                .listing
+                .iter()
+                .filter(|song| song.starts_with(file))
+                .cloned()
+                .collect::<Vec<_>>()
+        } else {
+            all_files.listing.clone()
+        };
+
+        Ok(files)
+    }
+
+    pub fn insert(&mut self, uri: &str) -> eyre::Result<Option<String>> {
+        let files = self.files_for(Some(uri))?;
+
+        for file in &files {
+            let song = mpd::song::Song {
+                file: file.to_string(),
+                ..Default::default()
+            };
+
+            self.client.insert(song, 0)?;
+        }
+
+        Ok(None)
+    }
+
     pub fn playlist(
         &mut self,
         name: Option<String>,
@@ -431,21 +468,7 @@ impl Client {
         &mut self,
         file: Option<&str>,
     ) -> eyre::Result<Option<String>> {
-        let all_files = Listing::from(self.client.listall()?);
-
-        let songs = if let Some(ref file) = file {
-            // TODO: this is inefficient but it's the only way I see at the moment
-            all_files
-                .listing
-                .iter()
-                .filter(|song| song.starts_with(file))
-                .cloned()
-                .collect::<Vec<_>>()
-        } else {
-            all_files.listing.clone()
-        };
-
-        let files = Listing::from(songs);
+        let files = Listing::from(self.files_for(file)?);
 
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
@@ -518,7 +541,7 @@ impl Client {
         self.current_status()
     }
 
-    pub(crate) fn single(
+    pub fn single(
         &mut self,
         state: Option<OnOff>,
     ) -> eyre::Result<Option<String>> {
