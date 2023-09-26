@@ -366,6 +366,42 @@ impl Client {
         Ok(Some(response))
     }
 
+    pub fn load(
+        &mut self,
+        name: &String,
+        range: Option<String>,
+    ) -> eyre::Result<Option<String>> {
+        match range {
+            Some(range_str) => {
+                let parts: Vec<u32> = range_str
+                    .split(':')
+                    .filter_map(|s| s.parse().ok())
+                    .collect();
+
+                match parts.as_slice() {
+                    [start, end] if start < end && *start > 0 && *end > 0 => {
+                        self.client.load(name, *start..*end)?;
+                    }
+                    [start, end] if start >= end => {
+                        return Err(eyre::eyre!(
+                            "end cannot be less than or equal to start"
+                        ));
+                    }
+                    _ => {
+                        return Err(eyre::eyre!(
+                        "invalid range, should be 'start:end' where start and end > 0."
+                    ));
+                    }
+                }
+            }
+            None => {
+                self.client.load(name, ..)?;
+            }
+        }
+
+        Ok(Some(format!("loading: {name}")))
+    }
+
     pub fn playlist(
         &mut self,
         name: Option<String>,
