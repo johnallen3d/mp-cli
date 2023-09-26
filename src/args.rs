@@ -98,6 +98,9 @@ pub(crate) enum Commands {
     /// Load a playlist into the queue (optionally provide a range)
     #[command()]
     Load { name: String, range: Option<String> },
+    /// Insert a song into the queue after the current song
+    #[command()]
+    Insert { uri: Option<String> },
     /// List songs in a playlist
     #[command()]
     Playlist { name: Option<String> },
