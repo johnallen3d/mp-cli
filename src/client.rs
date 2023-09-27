@@ -8,6 +8,8 @@ use serde::Serialize;
 
 use crate::{
     args::{OnOff, OutputFormat},
+    range,
+    range::INVALID_RANGE,
     song::Current,
     song::Finder,
     song::Listing,
@@ -373,26 +375,13 @@ impl Client {
     ) -> eyre::Result<Option<String>> {
         match range {
             Some(range_str) => {
-                let parts: Vec<u32> = range_str
-                    .split(':')
-                    .filter_map(|s| s.parse().ok())
-                    .collect();
+                let range_or_index = range::Parser::new(&range_str)?;
 
-                match parts.as_slice() {
-                    [start, end] if start < end && *start > 0 && *end > 0 => {
-                        self.client.load(name, *start..*end)?;
-                    }
-                    [start, end] if start >= end => {
-                        return Err(eyre::eyre!(
-                            "end cannot be less than or equal to start"
-                        ));
-                    }
-                    _ => {
-                        return Err(eyre::eyre!(
-                        "invalid range, should be 'start:end' where start and end > 0."
-                    ));
-                    }
+                if !range_or_index.is_range {
+                    return Err(eyre::eyre!(INVALID_RANGE));
                 }
+
+                self.client.load(name, range_or_index.range)?;
             }
             None => {
                 self.client.load(name, ..)?;
@@ -435,6 +424,35 @@ impl Client {
 
             self.client.insert(song, 0)?;
         }
+
+        Ok(None)
+    }
+
+    pub fn prio(
+        &mut self,
+        priority: &str,
+        position_or_range: &str,
+    ) -> eyre::Result<Option<String>> {
+        let priority = u8::try_from(priority.parse::<u32>()?).wrap_err(
+            format!("\"{priority}\" must be a value between 0 and 255"),
+        )?;
+
+        let queue_size = u32::try_from(self.client.queue()?.len())?;
+        let position_or_range = range::Parser::new(position_or_range)?;
+
+        if position_or_range.index > queue_size {
+            return Err(eyre::eyre!(
+                "position ({}) must be less than or equal to the queue length {}",
+                position_or_range.index,
+                queue_size,
+            ));
+        }
+
+        if position_or_range.is_range {
+            self.client.priority(position_or_range.range, priority)?;
+        } else {
+            self.client.priority(position_or_range.index, priority)?;
+        };
 
         Ok(None)
     }
