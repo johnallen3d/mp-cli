@@ -101,6 +101,12 @@ pub(crate) enum Commands {
     /// Insert a song into the queue after the current song
     #[command()]
     Insert { uri: Option<String> },
+    /// Set priority (0 default through 255) of song(s) in the queue
+    #[command()]
+    Prio {
+        priority: String,
+        position_or_range: String,
+    },
     /// List songs in a playlist
     #[command()]
     Playlist { name: Option<String> },

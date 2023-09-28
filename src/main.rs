@@ -9,6 +9,7 @@ use clap::Parser;
 
 mod args;
 mod client;
+mod range;
 mod se;
 mod song;
 mod stats;
@@ -58,6 +59,10 @@ fn main() {
         Some(Commands::Insert { uri }) => {
             mpd.insert(&input_or_stdin(uri, std::io::stdin().lock()))
         }
+        Some(Commands::Prio {
+            priority,
+            position_or_range,
+        }) => mpd.prio(&priority, &position_or_range),
         Some(Commands::Playlist { name }) => mpd.playlist(name),
         Some(Commands::Listall { file }) => mpd.listall(file.as_deref()),
         Some(Commands::Ls { directory }) => mpd.ls(directory.as_deref()),
