@@ -2,6 +2,7 @@ use std::fmt;
 
 use serde::Serialize;
 
+use crate::se::serialize_time;
 use crate::{args::OnOff, time::Time};
 
 #[derive(Serialize)]
@@ -12,7 +13,9 @@ pub struct Status {
     pub title: String,
     pub position: u32,
     pub queue_count: u32,
+    #[serde(serialize_with = "serialize_time")]
     pub elapsed: Time,
+    #[serde(serialize_with = "serialize_time")]
     pub track_length: Time,
     pub repeat: OnOff,
     pub random: OnOff,
@@ -65,7 +68,7 @@ mod tests {
         };
 
         let display_output = format!("{status}");
-        let expected_output = "volume=100\nstate=playing\nartist=Phish\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=01:00\ntrack_length=05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
+        let expected_output = "volume=100\nstate=playing\nartist=Phish\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=00:01:00\ntrack_length=00:05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
 
         assert_eq!(display_output, expected_output);
     }
