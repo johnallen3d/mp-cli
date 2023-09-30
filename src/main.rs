@@ -46,6 +46,7 @@ fn main() {
         Some(Commands::Toggle) => mpd.toggle(),
         Some(Commands::Cdprev) => mpd.cdprev(),
         Some(Commands::Stop) => mpd.stop(),
+        Some(Commands::Seek { position }) => mpd.seek(&position),
 
         Some(Commands::Clear) => mpd.clear(),
         Some(Commands::Outputs) => mpd.outputs(),

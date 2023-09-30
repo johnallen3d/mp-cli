@@ -1,6 +1,5 @@
 use std::fmt;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use eyre::WrapErr;
@@ -21,6 +20,7 @@ use crate::{
     stats::Outputs,
     stats::Stats,
     status::Status,
+    time,
 };
 
 #[derive(Serialize)]
@@ -222,6 +222,48 @@ impl Client {
         self.client.stop()?;
 
         self.current_status()
+    }
+
+    pub fn seek(&mut self, position: &str) -> eyre::Result<Option<String>> {
+        let current_status = self.status()?;
+
+        // valid position syntax: [+-][HH:MM:SS]|<0-100>%
+        let place = if position.contains('%') {
+            let position = position.replace('%', "");
+
+            let percent = position.parse::<u8>().wrap_err(format!(
+                "\"{position}\" must be a value between 0 and 100"
+            ))?;
+            if percent > 100 {
+                return Err(eyre::eyre!(
+                    "\"{position}\" must be a value between 0 and 100"
+                ));
+            }
+
+            let length = current_status.track_length.as_secs;
+            let percent = i64::try_from(percent)?;
+
+            length * percent / 100
+        } else if position.contains('+') || position.contains('-') {
+            let seconds = time::Time::from(position.to_string());
+            let current_place = current_status.elapsed;
+
+            let seconds = if position.contains('-') {
+                current_place - seconds
+            } else {
+                current_place + seconds
+            };
+
+            seconds.as_secs
+        } else {
+            time::Time::from(position.to_string()).as_secs
+        };
+
+        let position = self.status()?.position;
+
+        self.client.seek(position, place)?;
+
+        self.stats()
     }
 
     //

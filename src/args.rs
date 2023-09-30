@@ -64,6 +64,9 @@ pub(crate) enum Commands {
     /// Stop the player
     #[command()]
     Stop,
+    /// Seek the current track to the given position: [+-][HH:MM:SS]|<0-100>%
+    #[command()]
+    Seek { position: String },
 
     //
     // playlist related commands
