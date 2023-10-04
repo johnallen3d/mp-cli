@@ -23,6 +23,12 @@ use crate::{
     time,
 };
 
+#[derive(PartialEq)]
+enum Direction {
+    Forward,
+    Reverse,
+}
+
 #[derive(Serialize)]
 pub struct Versions {
     mpd: String,
@@ -245,16 +251,7 @@ impl Client {
 
             length * percent / 100
         } else if position.contains('+') || position.contains('-') {
-            let seconds = time::Time::from(position.to_string());
-            let current_place = current_status.elapsed;
-
-            let seconds = if position.contains('-') {
-                current_place - seconds
-            } else {
-                current_place + seconds
-            };
-
-            seconds.as_secs
+            current_status.elapsed.compute_offset(position)
         } else {
             time::Time::from(position.to_string()).as_secs
         };
@@ -262,6 +259,77 @@ impl Client {
         let position = self.status()?.position;
 
         self.client.seek(position, place)?;
+
+        self.stats()
+    }
+
+    pub fn seekthrough(
+        &mut self,
+        position: &str,
+    ) -> eyre::Result<Option<String>> {
+        let mut direction = Direction::Forward;
+
+        // valid position syntax: [+-][HH:MM:SS]
+        let mut place = if position.contains('%') {
+            return Err(eyre::eyre!(
+                "seekthrough does not support percentage based seeking"
+            ));
+        } else {
+            // if `-` present then back otherwise assume forward
+            if position.contains('-') {
+                direction = Direction::Reverse;
+            }
+            time::Time::from(position.to_string()).as_secs
+        };
+
+        let queue = self.client.queue()?;
+        let start = usize::try_from(self.status()?.position)?;
+        let mut elapsed = self.status()?.elapsed.as_secs;
+
+        match direction {
+            Direction::Forward => {
+                for song in queue.iter().cycle().skip(start) {
+                    let current_song_duration =
+                        i64::try_from(song.duration.unwrap().as_secs())?;
+                    let remainder = current_song_duration - elapsed - place;
+
+                    // seek position fits the current song
+                    if remainder >= 0 {
+                        let position = song.place.unwrap().id;
+                        self.client.seek(position, elapsed + place)?;
+                        break;
+                    }
+
+                    place = remainder.abs();
+                    elapsed = 0;
+                }
+            }
+            Direction::Reverse => {
+                // queue is reversed so we need to start from the end
+                let start = queue.len() - start - 1;
+
+                for song in queue.iter().rev().cycle().skip(start) {
+                    let current_song_duration =
+                        i64::try_from(song.duration.unwrap().as_secs())?;
+
+                    let remainder = if elapsed > 0 {
+                        elapsed - place
+                    } else {
+                        current_song_duration - place
+                    };
+
+                    // seek position fits the current song
+                    if remainder >= 0 {
+                        let position = song.place.unwrap().id;
+                        self.client.seek(position, remainder)?;
+                        break;
+                    }
+
+                    place = remainder.abs();
+                    elapsed = 0;
+                }
+            }
+        }
 
         self.stats()
     }
