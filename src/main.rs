@@ -47,6 +47,7 @@ fn main() {
         Some(Commands::Cdprev) => mpd.cdprev(),
         Some(Commands::Stop) => mpd.stop(),
         Some(Commands::Seek { position }) => mpd.seek(&position),
+        Some(Commands::Seekthrough { position }) => mpd.seekthrough(&position),
 
         Some(Commands::Clear) => mpd.clear(),
         Some(Commands::Outputs) => mpd.outputs(),

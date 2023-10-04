@@ -5,7 +5,7 @@ use std::time::Duration;
 use chrono::{NaiveTime, Timelike};
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Time {
     pub as_string: String,
     #[serde(skip_serializing)]
@@ -15,6 +15,18 @@ pub struct Time {
 }
 
 impl Time {
+    pub fn compute_offset(&self, other: &str) -> i64 {
+        let seconds = Self::from(other.to_string());
+
+        let seconds = if other.contains('-') {
+            self - &seconds
+        } else {
+            self + &seconds
+        };
+
+        seconds.as_secs
+    }
+
     fn add_or_subtract(
         &self,
         other: &Time,
@@ -34,23 +46,23 @@ impl Time {
         )
         .expect("Invalid time");
 
-        Time::from(result_time.format("%M:%S").to_string())
+        Time::from(result_time.format("%H:%M:%S").to_string())
     }
 }
 
-impl Add for Time {
+impl Add for &Time {
     type Output = Time;
 
-    fn add(self, other: Time) -> Time {
-        self.add_or_subtract(&other, |d1, d2| d1 + d2)
+    fn add(self, other: &Time) -> Time {
+        self.add_or_subtract(other, |t1, t2| t1 + t2)
     }
 }
 
-impl Sub for Time {
+impl Sub for &Time {
     type Output = Time;
 
-    fn sub(self, other: Time) -> Time {
-        self.add_or_subtract(&other, |d1, d2| d1 - d2)
+    fn sub(self, other: &Time) -> Time {
+        self.add_or_subtract(other, |t1, t2| t1 - t2)
     }
 }
 
@@ -156,6 +168,20 @@ impl From<Option<(Duration, Duration)>> for Track {
 mod tests {
     use super::*;
     use std::time::Duration;
+
+    #[test]
+    fn compute_offset_positive() {
+        let time = Time::from("0:05".to_string());
+
+        assert_eq!(time.compute_offset("0:15"), 20);
+    }
+
+    #[test]
+    fn compute_offset_negative() {
+        let time = Time::from("1:00".to_string());
+
+        assert_eq!(time.compute_offset("-0:30"), 30);
+    }
 
     #[test]
     fn test_time_from_duration() {
