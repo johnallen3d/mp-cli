@@ -786,7 +786,7 @@ impl Client {
 
         self.client
             .volume(target)
-            .map(|_| None)
+            .map(|()| None)
             .map_err(eyre::Report::from)
     }
 
@@ -805,6 +805,16 @@ impl Client {
             .as_ref()
             .and_then(|song| song.artist.as_ref())
             .map_or(String::new(), ToString::to_string);
+
+        let album = current_song
+            .as_ref()
+            .and_then(|song| {
+                song.tags
+                    .iter()
+                    .find(|&(key, _)| key.to_lowercase() == "album")
+            })
+            .map_or_else(String::new, |(_, value)| value.clone());
+
         let title = current_song
             .as_ref()
             .and_then(|song| song.title.as_ref())
@@ -827,6 +837,7 @@ impl Client {
             volume,
             state,
             artist,
+            album,
             title,
             position,
             queue_count: status.queue_len,
