@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4](https://github.com/johnallen3d/mp-cli/compare/v0.1.3...v0.1.4) - 2023-10-09
+
+### Added
+- *(status)* include album in `status` ([#66](https://github.com/johnallen3d/mp-cli/pull/66))
+- add `seekthrough` command ([#64](https://github.com/johnallen3d/mp-cli/pull/64))
+- add `seek` command ([#63](https://github.com/johnallen3d/mp-cli/pull/63))
+- add `prio` command ([#61](https://github.com/johnallen3d/mp-cli/pull/61))
+- add `insert` command ([#60](https://github.com/johnallen3d/mp-cli/pull/60))
+- add `load` command ([#57](https://github.com/johnallen3d/mp-cli/pull/57))
+
+### Other
+- *(deps)* bump clap from 4.4.5 to 4.4.6 ([#62](https://github.com/johnallen3d/mp-cli/pull/62))
+- *(deps)* bump clap from 4.4.4 to 4.4.5 ([#59](https://github.com/johnallen3d/mp-cli/pull/59))
+
 ## [0.1.3](https://github.com/johnallen3d/mp-cli/compare/v0.1.2...v0.1.3) - 2023-09-25
 
 ### Added
