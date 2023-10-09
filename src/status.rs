@@ -10,6 +10,7 @@ pub struct Status {
     pub volume: String,
     pub state: String,
     pub artist: String,
+    pub album: String,
     pub title: String,
     pub position: u32,
     pub queue_count: u32,
@@ -27,10 +28,11 @@ impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "volume={}\nstate={}\nartist={}\ntitle={}\nposition={}\nqueue_count={}\nelapsed={}\ntrack_length={}\nrepeat={}\nrandom={}\nsingle={}\nconsume={}",
+            "volume={}\nstate={}\nartist={}\nalbum={}\ntitle={}\nposition={}\nqueue_count={}\nelapsed={}\ntrack_length={}\nrepeat={}\nrandom={}\nsingle={}\nconsume={}",
             self.volume,
             self.state,
             self.artist,
+            self.album,
             self.title,
             self.position,
             self.queue_count,
@@ -56,6 +58,7 @@ mod tests {
             volume: "100".to_string(),
             state: "playing".to_string(),
             artist: "Phish".to_string(),
+            album: "A Picture Of Nectar".to_string(),
             title: "Chalk Dust Torture".to_string(),
             position: 3,
             queue_count: 10,
@@ -68,7 +71,7 @@ mod tests {
         };
 
         let display_output = format!("{status}");
-        let expected_output = "volume=100\nstate=playing\nartist=Phish\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=00:01:00\ntrack_length=00:05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
+        let expected_output = "volume=100\nstate=playing\nartist=Phish\nalbum=A Picture Of Nectar\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=00:01:00\ntrack_length=00:05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
 
         assert_eq!(display_output, expected_output);
     }

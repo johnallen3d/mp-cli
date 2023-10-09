@@ -76,8 +76,8 @@ impl From<Status> for Current {
 impl From<Song> for Current {
     fn from(song: Song) -> Self {
         Current {
-            artist: song.inner.artist.unwrap_or(String::new()),
-            title: song.inner.title.unwrap_or(String::new()),
+            artist: song.inner.artist.unwrap_or_default(),
+            title: song.inner.title.unwrap_or_default(),
         }
     }
 }
