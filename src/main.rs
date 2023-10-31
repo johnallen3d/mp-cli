@@ -54,6 +54,7 @@ fn main() {
         Some(Commands::Enable { args }) => mpd.enable(args),
         Some(Commands::Disable { args }) => mpd.disable(args),
         Some(Commands::Toggleoutput { args }) => mpd.toggle_output(args),
+        Some(Commands::Outputset { args }) => mpd.output_set(args),
         Some(Commands::Queued) => mpd.queued(),
         Some(Commands::Shuffle) => mpd.shuffle(),
         Some(Commands::Lsplaylists) => mpd.lsplaylists(),
