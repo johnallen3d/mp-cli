@@ -1,31 +1,23 @@
 #![deny(clippy::pedantic)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
 use std::io::BufRead;
-
-extern crate chrono;
-extern crate mpd;
-extern crate serde_json;
 
 use clap::Parser;
 
 mod args;
-mod client;
-mod range;
-mod se;
-mod song;
-mod stats;
-mod status;
-mod time;
 
-use args::{Cli, Commands};
+use args::{Cli, Commands, OnOff};
+use mpd_easy::Client;
 
 fn main() {
     let args = Cli::parse();
 
     // safe to unwrap because we have default values
-    let mut mpd = match crate::client::Client::new(
+    let mut mpd = match Client::new(
         &args.bind_to_address.unwrap(),
         &args.port.unwrap(),
-        args.format.clone(),
+        args.format.to(),
     ) {
         Ok(client) => client,
         Err(e) => handle_error(e),
@@ -68,10 +60,10 @@ fn main() {
         Some(Commands::Playlist { name }) => mpd.playlist(name),
         Some(Commands::Listall { file }) => mpd.listall(file.as_deref()),
         Some(Commands::Ls { directory }) => mpd.ls(directory.as_deref()),
-        Some(Commands::Repeat { state }) => mpd.repeat(state),
-        Some(Commands::Random { state }) => mpd.random(state),
-        Some(Commands::Single { state }) => mpd.single(state),
-        Some(Commands::Consume { state }) => mpd.consume(state),
+        Some(Commands::Repeat { state }) => mpd.repeat(OnOff::to(&state)),
+        Some(Commands::Random { state }) => mpd.random(OnOff::to(&state)),
+        Some(Commands::Single { state }) => mpd.single(OnOff::to(&state)),
+        Some(Commands::Consume { state }) => mpd.consume(OnOff::to(&state)),
         Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
         Some(Commands::Save { name }) => mpd.save(&name),

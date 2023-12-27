@@ -1,26 +1,15 @@
-[package]
-name = "mp-cli"
+[workspace]
+resolver = "2"
+
+members = ["cli", "lib"]
+
+[workspace.package]
 version = "0.1.4"
 edition = "2021"
 authors = ["John Allen <john@threedogconsulting.com"]
-description = "A Music Player Daemon (MPD) CLI client implemented in Rust."
 homepage = "https://github.com/johnallen3d/mp-cli"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/johnallen3d/mp-cli.git"
 
-[dependencies]
-chrono = { version = "0.4.31", features = [] }
-clap = { version = "4.4.11", features = ["derive"] }
-eyre = "0.6.11"
-mpd = { version = "0.1.0", features = ["serde"] }
+[workspace.dependencies]
 serde = { version = "1.0.193", features = ["derive"] }
-serde_json = "1.0.108"
-
-[dev-dependencies]
-tempdir = "0.3.7"
-
-[profile.release]
-codegen-units = 1 # Single codegen unit for better optimizations
-lto = true        # Enable Link Time Optimization
-opt-level = 'z'   # Optimize for size
-panic = "abort"

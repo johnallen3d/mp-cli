@@ -11,8 +11,9 @@ pub const INVALID_RANGE: &str =
 ///
 /// # Examples
 ///
-/// ```
-/// # use your_crate::Parser;
+/// ```ignore
+/// use mpd_easy::range::Parser;
+///
 /// let parser = Parser::new("5:10").unwrap();
 /// assert!(parser.is_range);
 /// assert_eq!(parser.range.start, 5);
