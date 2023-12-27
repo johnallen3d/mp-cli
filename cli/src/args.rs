@@ -121,9 +121,12 @@ pub(crate) enum Commands {
     /// Toggle consume mode or set to provided state
     #[command()]
     Consume { state: Option<OnOff> },
-    /// Search for songs by type and query
+    /// Search for songs by type/query
     #[command()]
     Search { tag: Tag, query: String },
+    /// Search for songs by type/query and add to queue
+    #[command()]
+    SearchAdd { tag: Tag, query: String },
     /// Toggle consume mode or set to provided state
     #[command()]
     Crossfade { seconds: Option<String> },
