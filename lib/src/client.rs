@@ -692,9 +692,22 @@ impl Client {
     ) -> eyre::Result<Vec<mpd::Song>> {
         let term = mpd::Term::Tag(tag.into());
         let mut binding = mpd::Query::new();
-        let query = binding.and(term, query);
+        let songs = binding.and(term, query);
 
-        Ok(self.client.search(query, None)?)
+        Ok(self.client.search(songs, None)?)
+    }
+
+    // TODO: better name or abstraction?
+    pub fn _find(
+        &mut self,
+        tag: &str,
+        query: &str,
+    ) -> eyre::Result<Vec<mpd::Song>> {
+        let term = mpd::Term::Tag(tag.into());
+        let mut binding = mpd::Query::new();
+        let songs = binding.and(term, query);
+
+        Ok(self.client.search(songs, None)?)
     }
 
     pub fn search(
@@ -702,7 +715,8 @@ impl Client {
         tag: &str,
         query: &str,
     ) -> eyre::Result<Option<String>> {
-        let files = Listing::from(self._search(tag, query)?);
+        let songs = self._search(tag, query)?;
+        let files = Listing::from(songs);
 
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
@@ -717,7 +731,9 @@ impl Client {
         tag: &str,
         query: &str,
     ) -> eyre::Result<Option<String>> {
-        for song in self._search(tag, query)? {
+        let songs = self._search(tag, query)?;
+
+        for song in songs {
             self.client
                 .push(song.clone())
                 .wrap_err(format!("unkown or inalid path: {}", song.file))?;
@@ -731,11 +747,7 @@ impl Client {
         tag: &str,
         query: &str,
     ) -> eyre::Result<Option<String>> {
-        let term = mpd::Term::Tag(tag.into());
-        let mut binding = mpd::Query::new();
-        let query = binding.and(term, query);
-
-        let songs = self.client.find(query, None)?;
+        let songs = self._find(tag, query)?;
         let files = Listing::from(songs);
 
         let response = match self.format {
@@ -744,6 +756,22 @@ impl Client {
         };
 
         Ok(Some(response))
+    }
+
+    pub fn find_add(
+        &mut self,
+        tag: &str,
+        query: &str,
+    ) -> eyre::Result<Option<String>> {
+        let songs = self._find(tag, query)?;
+
+        for song in songs {
+            self.client
+                .push(song.clone())
+                .wrap_err(format!("unkown or inalid path: {}", song.file))?;
+        }
+
+        Ok(None)
     }
 
     pub fn consume(

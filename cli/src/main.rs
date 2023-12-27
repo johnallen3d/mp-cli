@@ -70,6 +70,9 @@ fn main() {
             mpd.search_add(tag.to_str(), &query)
         }
         Some(Commands::Find { tag, query }) => mpd.find(tag.to_str(), &query),
+        Some(Commands::FindAdd { tag, query }) => {
+            mpd.find_add(tag.to_str(), &query)
+        }
         Some(Commands::Consume { state }) => mpd.consume(OnOff::to(&state)),
         Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
