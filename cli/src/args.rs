@@ -19,9 +19,6 @@ pub(crate) struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Commands {
-    //
-    // queue related commands
-    //
     /// Add a song to the queue at the given path (or dir '/')
     #[command()]
     Add { path: Option<String> },
@@ -34,10 +31,6 @@ pub(crate) enum Commands {
     /// Print the current song
     #[command()]
     Del { position: Option<u32> },
-
-    //
-    // playback related commands
-    //
     /// Start the player
     #[command()]
     Play { position: Option<u32> },
@@ -68,10 +61,6 @@ pub(crate) enum Commands {
     /// Seek the current track or through the playslist : [+-][HH:MM:SS]
     #[command()]
     Seekthrough { position: String },
-
-    //
-    // playlist related commands
-    //
     /// Clear the current playlist
     #[command()]
     Clear,
@@ -132,10 +121,12 @@ pub(crate) enum Commands {
     /// Toggle consume mode or set to provided state
     #[command()]
     Consume { state: Option<OnOff> },
+    /// Search for songs by type and query
+    #[command()]
+    Search { tag: Tag, query: String },
     /// Toggle consume mode or set to provided state
     #[command()]
     Crossfade { seconds: Option<String> },
-
     /// Save queue to a playlist
     #[command()]
     Save { name: String },
@@ -145,17 +136,12 @@ pub(crate) enum Commands {
     /// Set the volume to specified value <num> or increase/decrease it [+-]<num>
     #[command()]
     Volume { volume: String },
-
     /// Provide mpd statistics
     #[command()]
     Stats,
     /// Provide the mpd version and the mp-cli version
     #[command()]
     Version,
-
-    //
-    // output related commands
-    //
     /// Get the current status of the player
     #[command()]
     Status,
@@ -188,6 +174,69 @@ impl OnOff {
             Some(OnOff::On) => Some(mpd_easy::OnOff::On),
             Some(OnOff::Off) => Some(mpd_easy::OnOff::Off),
             None => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+pub enum Tag {
+    Artist,
+    ArtistSort,
+    Album,
+    AlbumSort,
+    AlbumArtist,
+    AlbumSortOrder,
+    Title,
+    Track,
+    Name,
+    Genre,
+    Date,
+    Composer,
+    Performer,
+    Conductor,
+    Work,
+    Grouping,
+    Comment,
+    Disc,
+    Label,
+    MusicbrainzArtistId,
+    MusicbrainzAlbumId,
+    MusicbrainzAlbumArtistId,
+    MusicbrainzTrackId,
+    MusicbrainzReleaseTrackId,
+    MusicbrainzWorkId,
+    Any,
+}
+
+impl Tag {
+    pub fn to_str(&self) -> &str {
+        match self {
+            Tag::Artist => "Artist",
+            Tag::ArtistSort => "ArtistSort",
+            Tag::Album => "Album",
+            Tag::AlbumSort => "AlbumSort",
+            Tag::AlbumArtist => "AlbumArtist",
+            Tag::AlbumSortOrder => "AlbumSortOrder",
+            Tag::Title => "Title",
+            Tag::Track => "Track",
+            Tag::Name => "Name",
+            Tag::Genre => "Genre",
+            Tag::Date => "Date",
+            Tag::Composer => "Composer",
+            Tag::Performer => "Performer",
+            Tag::Conductor => "Conductor",
+            Tag::Work => "Work",
+            Tag::Grouping => "Grouping",
+            Tag::Comment => "Comment",
+            Tag::Disc => "Disc",
+            Tag::Label => "Label",
+            Tag::MusicbrainzArtistId => "MusicbrainzArtistId",
+            Tag::MusicbrainzAlbumId => "MusicbrainzAlbumId",
+            Tag::MusicbrainzAlbumArtistId => "MusicbrainzAlbumArtistId",
+            Tag::MusicbrainzTrackId => "MusicbrainzTrackId",
+            Tag::MusicbrainzReleaseTrackId => "MusicbrainzReleaseTrackId",
+            Tag::MusicbrainzWorkId => "MusicbrainzWorkId",
+            Tag::Any => "Any",
         }
     }
 }

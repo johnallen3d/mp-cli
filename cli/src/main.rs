@@ -63,6 +63,9 @@ fn main() {
         Some(Commands::Repeat { state }) => mpd.repeat(OnOff::to(&state)),
         Some(Commands::Random { state }) => mpd.random(OnOff::to(&state)),
         Some(Commands::Single { state }) => mpd.single(OnOff::to(&state)),
+        Some(Commands::Search { tag, query }) => {
+            mpd.search(tag.to_str(), &query)
+        }
         Some(Commands::Consume { state }) => mpd.consume(OnOff::to(&state)),
         Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
