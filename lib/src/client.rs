@@ -684,6 +684,27 @@ impl Client {
         self.current_status()
     }
 
+    pub fn search(
+        &mut self,
+        tag: &str,
+        query: &str,
+    ) -> eyre::Result<Option<String>> {
+        let term = mpd::Term::Tag(tag.into());
+        let mut binding = mpd::Query::new();
+        let query = binding.and(term, query);
+
+        let results = self.client.search(query, None)?;
+
+        let files = Listing::from(results);
+
+        let response = match self.format {
+            OutputFormat::Json => serde_json::to_string(&files)?,
+            OutputFormat::Text => files.to_string(),
+        };
+
+        Ok(Some(response))
+    }
+
     pub fn consume(
         &mut self,
         state: Option<OnOff>,
