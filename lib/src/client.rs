@@ -684,18 +684,25 @@ impl Client {
         self.current_status()
     }
 
+    // TODO: better name or abstraction?
+    pub fn _search(
+        &mut self,
+        tag: &str,
+        query: &str,
+    ) -> eyre::Result<Vec<mpd::Song>> {
+        let term = mpd::Term::Tag(tag.into());
+        let mut binding = mpd::Query::new();
+        let query = binding.and(term, query);
+
+        Ok(self.client.search(query, None)?)
+    }
+
     pub fn search(
         &mut self,
         tag: &str,
         query: &str,
     ) -> eyre::Result<Option<String>> {
-        let term = mpd::Term::Tag(tag.into());
-        let mut binding = mpd::Query::new();
-        let query = binding.and(term, query);
-
-        let results = self.client.search(query, None)?;
-
-        let files = Listing::from(results);
+        let files = Listing::from(self._search(tag, query)?);
 
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
@@ -703,6 +710,20 @@ impl Client {
         };
 
         Ok(Some(response))
+    }
+
+    pub fn search_add(
+        &mut self,
+        tag: &str,
+        query: &str,
+    ) -> eyre::Result<Option<String>> {
+        for song in self._search(tag, query)? {
+            self.client
+                .push(song.clone())
+                .wrap_err(format!("unkown or inalid path: {}", song.file))?;
+        }
+
+        Ok(None)
     }
 
     pub fn consume(
