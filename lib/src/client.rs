@@ -6,7 +6,6 @@ use eyre::WrapErr;
 use serde::Serialize;
 
 use crate::{
-    args::{OnOff, OutputFormat},
     range,
     range::INVALID_RANGE,
     song::Current,
@@ -20,7 +19,7 @@ use crate::{
     stats::Outputs,
     stats::Stats,
     status::Status,
-    time,
+    time, {OnOff, OutputFormat},
 };
 
 #[derive(PartialEq)]
@@ -174,6 +173,8 @@ impl Client {
         self.current_status()
     }
 
+    // allowing because this follows an external api naming convention
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> eyre::Result<Option<String>> {
         self.client.next()?;
 
@@ -655,7 +656,7 @@ impl Client {
         self.current_status()
     }
 
-    pub(crate) fn random(
+    pub fn random(
         &mut self,
         state: Option<OnOff>,
     ) -> eyre::Result<Option<String>> {

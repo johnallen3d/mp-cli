@@ -1,5 +1,3 @@
-use std::fmt;
-
 use clap::{Parser, Subcommand, ValueEnum};
 use serde::Serialize;
 
@@ -169,27 +167,27 @@ pub enum OutputFormat {
     Json,
 }
 
+impl OutputFormat {
+    pub fn to(&self) -> mpd_easy::OutputFormat {
+        match self {
+            OutputFormat::Text => mpd_easy::OutputFormat::Text,
+            OutputFormat::Json => mpd_easy::OutputFormat::Json,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, ValueEnum)]
 pub enum OnOff {
     On,
     Off,
 }
 
-impl From<bool> for OnOff {
-    fn from(value: bool) -> Self {
-        if value {
-            OnOff::On
-        } else {
-            OnOff::Off
-        }
-    }
-}
-
-impl fmt::Display for OnOff {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            OnOff::On => write!(f, "on"),
-            OnOff::Off => write!(f, "off"),
+impl OnOff {
+    pub fn to(value: &Option<OnOff>) -> Option<mpd_easy::OnOff> {
+        match value {
+            Some(OnOff::On) => Some(mpd_easy::OnOff::On),
+            Some(OnOff::Off) => Some(mpd_easy::OnOff::Off),
+            None => None,
         }
     }
 }

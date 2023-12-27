@@ -1,0 +1,13 @@
+[package]
+name = "mp-cli"
+version.workspace = true
+edition.workspace = true
+description = "A Music Player Daemon (MPD) CLI client implemented in Rust."
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+clap = { version = "4.4.11", features = ["derive"] }
+mpd-easy = { path = "../lib" }
+serde = { workspace = true }

@@ -3,7 +3,7 @@ use std::fmt;
 use serde::Serialize;
 
 use crate::se::serialize_time;
-use crate::{args::OnOff, time::Time};
+use crate::{time::Time, OnOff};
 
 #[derive(Serialize)]
 pub struct Status {
@@ -49,8 +49,8 @@ impl fmt::Display for Status {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::args::OnOff;
     use crate::time::Time;
+    use crate::OnOff;
 
     #[test]
     fn test_status_display_format() {
