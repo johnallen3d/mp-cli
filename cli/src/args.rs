@@ -133,6 +133,10 @@ pub(crate) enum Commands {
     /// Find (exact match) song(s) by type/query and add to queue
     #[command()]
     FindAdd { tag: Tag, query: String },
+    /// Show all elements of the given tag type (eg. albums)
+    #[command()]
+    // TODO: should also accept additional/optional [tag query]s
+    List { tag: Tag },
     /// Toggle consume mode or set to provided state
     #[command()]
     Crossfade { seconds: Option<String> },
