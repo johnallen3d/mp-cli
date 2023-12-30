@@ -248,7 +248,7 @@ impl Client {
             }
 
             let length = current_status.track_length.as_secs;
-            let percent = i64::try_from(percent)?;
+            let percent = i64::from(percent);
 
             length * percent / 100
         } else if position.contains('+') || position.contains('-') {
@@ -439,7 +439,7 @@ impl Client {
 
     pub fn queued(&mut self) -> eyre::Result<Option<String>> {
         if let Some(song) =
-            self.client.queue().map_err(|e| eyre::eyre!(e))?.get(0)
+            self.client.queue().map_err(|e| eyre::eyre!(e))?.first()
         {
             // safe to unwrap because we know we have a song
             let current = Current::from(Song {

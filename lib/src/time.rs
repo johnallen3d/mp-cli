@@ -5,11 +5,12 @@ use std::time::Duration;
 use chrono::{NaiveTime, Timelike};
 use serde::Serialize;
 
+#[allow(clippy::struct_field_names)]
 #[derive(Clone, Debug, Serialize)]
 pub struct Time {
     pub as_string: String,
     #[serde(skip_serializing)]
-    pub as_native_time: NaiveTime,
+    pub as_native: NaiveTime,
     #[serde(skip_serializing)]
     pub as_secs: i64,
 }
@@ -106,12 +107,11 @@ impl From<String> for Time {
             .or_else(|_| NaiveTime::parse_from_str(&as_string, "%M:%S"))
             .or_else(|_| NaiveTime::parse_from_str("00:01", "%M:%S"))
             .unwrap();
-        let as_secs = i64::try_from(as_native_time.num_seconds_from_midnight())
-            .unwrap_or(0);
+        let as_secs = i64::from(as_native_time.num_seconds_from_midnight());
 
         Time {
             as_string,
-            as_native_time,
+            as_native: as_native_time,
             as_secs,
         }
     }
