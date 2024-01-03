@@ -133,10 +133,15 @@ pub(crate) enum Commands {
     /// Find (exact match) song(s) by type/query and add to queue
     #[command()]
     FindAdd { tag: Tag, query: String },
-    /// Show all elements of the given tag type (eg. albums)
+    /// Show all elements of the given tag type (eg. albums). Optionally provide
+    /// an exact match query in the form of <TAG> <QUERY> (see: `find`)
     #[command()]
     // TODO: should also accept additional/optional [tag query]s
-    List { tag: Tag },
+    List {
+        tag: Tag,
+        #[arg(required = false, num_args = 2..)]
+        queries: Vec<Query>,
+    },
     /// Toggle consume mode or set to provided state
     #[command()]
     Crossfade { seconds: Option<String> },
@@ -158,6 +163,24 @@ pub(crate) enum Commands {
     /// Get the current status of the player
     #[command()]
     Status,
+}
+
+#[derive(Clone, Debug)]
+pub struct Query {
+    pub tag: Tag,
+    pub query: String,
+}
+
+impl std::convert::From<std::string::String> for Query {
+    fn from(input: String) -> Self {
+        dbg!(&input);
+        let mut parts = input.splitn(2, ' ');
+        dbg!(&parts);
+        let tag: Tag = parts.next().unwrap().parse().unwrap();
+        dbg!(&tag);
+        let query = parts.next().unwrap().to_string();
+        Query { tag, query }
+    }
 }
 
 #[derive(Clone, Debug, ValueEnum)]
@@ -250,6 +273,42 @@ impl Tag {
             Tag::MusicbrainzReleaseTrackId => "MusicbrainzReleaseTrackId",
             Tag::MusicbrainzWorkId => "MusicbrainzWorkId",
             Tag::Any => "Any",
+        }
+    }
+}
+
+impl std::str::FromStr for Tag {
+    type Err = String;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        match string {
+            "artist" | "Artist" => Ok(Tag::Artist),
+            "ArtistSort" => Ok(Tag::ArtistSort),
+            "album" | "Album" => Ok(Tag::Album),
+            "AlbumSort" => Ok(Tag::AlbumSort),
+            "AlbumArtist" => Ok(Tag::AlbumArtist),
+            "AlbumSortOrder" => Ok(Tag::AlbumSortOrder),
+            "Title" => Ok(Tag::Title),
+            "Track" => Ok(Tag::Track),
+            "Name" => Ok(Tag::Name),
+            "Genre" => Ok(Tag::Genre),
+            "Date" => Ok(Tag::Date),
+            "Composer" => Ok(Tag::Composer),
+            "Performer" => Ok(Tag::Performer),
+            "Conductor" => Ok(Tag::Conductor),
+            "Work" => Ok(Tag::Work),
+            "Grouping" => Ok(Tag::Grouping),
+            "Comment" => Ok(Tag::Comment),
+            "Disc" => Ok(Tag::Disc),
+            "Label" => Ok(Tag::Label),
+            "MusicbrainzArtistId" => Ok(Tag::MusicbrainzArtistId),
+            "MusicbrainzAlbumId" => Ok(Tag::MusicbrainzAlbumId),
+            "MusicbrainzAlbumArtistId" => Ok(Tag::MusicbrainzAlbumArtistId),
+            "MusicbrainzTrackId" => Ok(Tag::MusicbrainzTrackId),
+            "MusicbrainzReleaseTrackId" => Ok(Tag::MusicbrainzReleaseTrackId),
+            "MusicbrainzWorkId" => Ok(Tag::MusicbrainzWorkId),
+            "Any" => Ok(Tag::Any),
+            _ => Err(format!("{string} is not a valid tag")),
         }
     }
 }
