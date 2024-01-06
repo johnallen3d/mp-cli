@@ -18,13 +18,14 @@ mod status;
 mod time;
 
 pub use client::Client;
+pub use status::State;
 
 pub enum OutputFormat {
     Text,
     Json,
 }
 
-#[derive(PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum OnOff {
     On,
     Off,

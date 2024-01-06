@@ -5,10 +5,38 @@ use serde::Serialize;
 use crate::se::serialize_time;
 use crate::{time::Time, OnOff};
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
+pub enum State {
+    Stop,
+    Play,
+    Pause,
+}
+
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let state = match self {
+            State::Stop => "stop",
+            State::Play => "play",
+            State::Pause => "pause",
+        };
+        write!(f, "{state}")
+    }
+}
+
+impl From<mpd::State> for State {
+    fn from(state: mpd::State) -> Self {
+        match state {
+            mpd::State::Stop => State::Stop,
+            mpd::State::Play => State::Play,
+            mpd::State::Pause => State::Pause,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
 pub struct Status {
     pub volume: String,
-    pub state: String,
+    pub state: State,
     pub artist: String,
     pub album: String,
     pub title: String,
@@ -56,7 +84,7 @@ mod tests {
     fn test_status_display_format() {
         let status = Status {
             volume: "100".to_string(),
-            state: "playing".to_string(),
+            state: State::Play,
             artist: "Phish".to_string(),
             album: "A Picture Of Nectar".to_string(),
             title: "Chalk Dust Torture".to_string(),
@@ -71,7 +99,7 @@ mod tests {
         };
 
         let display_output = format!("{status}");
-        let expected_output = "volume=100\nstate=playing\nartist=Phish\nalbum=A Picture Of Nectar\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=00:01:00\ntrack_length=00:05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
+        let expected_output = "volume=100\nstate=play\nartist=Phish\nalbum=A Picture Of Nectar\ntitle=Chalk Dust Torture\nposition=3\nqueue_count=10\nelapsed=00:01:00\ntrack_length=00:05:00\nrepeat=off\nrandom=on\nsingle=off\nconsume=off";
 
         assert_eq!(display_output, expected_output);
     }
