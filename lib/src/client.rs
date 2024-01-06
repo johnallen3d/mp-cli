@@ -900,7 +900,7 @@ impl Client {
     // output related commands
     //
 
-    fn status(&mut self) -> eyre::Result<Status> {
+    pub fn status(&mut self) -> eyre::Result<Status> {
         let status = self.client.status()?;
 
         let volume = status.volume.to_string();
@@ -926,13 +926,6 @@ impl Client {
             .and_then(|song| song.title.as_ref())
             .map_or(String::new(), ToString::to_string);
 
-        let state = match status.state {
-            mpd::State::Play => "play",
-            mpd::State::Pause => "pause",
-            mpd::State::Stop => "stop",
-        }
-        .to_string();
-
         let position = match status.song {
             Some(song) => song.pos,
             None => 0,
@@ -941,7 +934,7 @@ impl Client {
 
         Ok(Status {
             volume,
-            state,
+            state: crate::status::State::from(status.state),
             artist,
             album,
             title,
