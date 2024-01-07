@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7](https://github.com/johnallen3d/mp-cli/compare/mp-cli-v0.1.6...mp-cli-v0.1.7) - 2024-01-07
+
+### Other
+- fix README for `cli` crate ([#103](https://github.com/johnallen3d/mp-cli/pull/103))
+
 ## [0.1.5](https://github.com/johnallen3d/mp-cli/compare/mp-cli-v0.1.4...mp-cli-v0.1.5) - 2024-01-06
 
 ### Added
