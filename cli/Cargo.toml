@@ -9,5 +9,5 @@ repository.workspace = true
 
 [dependencies]
 clap = { version = "4.4.13", features = ["derive"] }
-mpd-easy = { path = "../lib" }
+mpd-easy = { path = "../lib", version = "0.1.6" }
 serde = { workspace = true }
