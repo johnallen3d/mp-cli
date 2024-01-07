@@ -23,7 +23,7 @@ defaults:
 jobs:
   upload-assets:
     name: ${{ matrix.target }}
-    if: github.repository_owner == 'johnallen3d' && startsWith(github.event.release.name, 'v')
+    if: github.repository_owner == 'johnallen3d' && startsWith(github.event.release.name, 'mp-cli-v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
