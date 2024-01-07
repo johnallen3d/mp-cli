@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6](https://github.com/johnallen3d/mp-cli/compare/mpd-easy-v0.1.5...mpd-easy-v0.1.6) - 2024-01-07
+
+### Other
+- add README for `mpd-easy` ([#98](https://github.com/johnallen3d/mp-cli/pull/98))
+
 ## [0.1.5](https://github.com/johnallen3d/mp-cli/compare/mpd-easy-v0.1.4...mpd-easy-v0.1.5) - 2024-01-06
 
 ### Added
