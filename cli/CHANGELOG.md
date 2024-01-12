@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/johnallen3d/mp-cli/compare/mp-cli-v0.1.7...mp-cli-v0.2.0) - 2024-01-12
+
+### Added
+- optional output ([#109](https://github.com/johnallen3d/mp-cli/pull/109))
+
+### Other
+- *(deps)* bump clap from 4.4.14 to 4.4.16 ([#107](https://github.com/johnallen3d/mp-cli/pull/107))
+- *(deps)* bump clap from 4.4.13 to 4.4.14 ([#106](https://github.com/johnallen3d/mp-cli/pull/106))
+
 ## [0.1.7](https://github.com/johnallen3d/mp-cli/compare/mp-cli-v0.1.6...mp-cli-v0.1.7) - 2024-01-07
 
 ### Other
