@@ -23,6 +23,7 @@ pub use status::State;
 pub enum OutputFormat {
     Text,
     Json,
+    None,
 }
 
 #[derive(Debug, PartialEq, Serialize)]

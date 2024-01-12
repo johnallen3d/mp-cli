@@ -17,7 +17,7 @@ fn main() {
     let mut mpd = match Client::new(
         &args.bind_to_address.unwrap(),
         &args.port.unwrap(),
-        args.format.to(),
+        Some(args.format.to()),
     ) {
         Ok(client) => client,
         Err(e) => handle_error(e),
