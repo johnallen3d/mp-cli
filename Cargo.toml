@@ -4,7 +4,7 @@ resolver = "2"
 members = ["cli", "lib"]
 
 [workspace.package]
-version = "0.1.7"
+version = "0.2.0"
 edition = "2021"
 authors = ["John Allen <john@threedogconsulting.com"]
 homepage = "https://github.com/johnallen3d/mp-cli"
