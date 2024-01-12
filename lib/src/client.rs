@@ -22,6 +22,8 @@ use crate::{
     time, {OnOff, OutputFormat},
 };
 
+const NO_OUT: String = String::new();
+
 #[derive(PartialEq)]
 enum Direction {
     Forward,
@@ -49,8 +51,9 @@ impl Client {
     pub fn new(
         bind_to_address: &str,
         port: &str,
-        format: OutputFormat,
+        format: Option<OutputFormat>,
     ) -> eyre::Result<Client> {
+        let format = format.unwrap_or(OutputFormat::Json);
         let client = mpd::Client::connect(format!("{bind_to_address}:{port}"))
             .wrap_err("Error connecting to mpd server".to_string())?;
 
@@ -133,6 +136,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&current)?,
             OutputFormat::Text => current.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -354,6 +358,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&outputs)?,
             OutputFormat::Text => outputs.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -449,6 +454,7 @@ impl Client {
             let response = match self.format {
                 OutputFormat::Json => serde_json::to_string(&current)?,
                 OutputFormat::Text => current.to_string(),
+                OutputFormat::None => NO_OUT,
             };
 
             Ok(Some(response))
@@ -474,6 +480,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&playlists)?,
             OutputFormat::Text => playlists.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -588,6 +595,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&track_list)?,
             OutputFormat::Text => track_list.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -602,6 +610,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
             OutputFormat::Text => files.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -637,6 +646,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&results)?,
             OutputFormat::Text => results.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -721,6 +731,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
             OutputFormat::Text => files.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -753,6 +764,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
             OutputFormat::Text => files.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -784,6 +796,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&files)?,
             OutputFormat::Text => files.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -833,6 +846,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&versions)?,
             OutputFormat::Text => versions.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -844,6 +858,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&stats)?,
             OutputFormat::Text => stats.to_string(),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))
@@ -954,6 +969,7 @@ impl Client {
         let response = match self.format {
             OutputFormat::Json => serde_json::to_string(&status)?,
             OutputFormat::Text => format!("{status}"),
+            OutputFormat::None => NO_OUT,
         };
 
         Ok(Some(response))

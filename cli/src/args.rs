@@ -164,6 +164,7 @@ pub(crate) enum Commands {
 pub enum OutputFormat {
     Text,
     Json,
+    None,
 }
 
 impl OutputFormat {
@@ -171,6 +172,7 @@ impl OutputFormat {
         match self {
             OutputFormat::Text => mpd_easy::OutputFormat::Text,
             OutputFormat::Json => mpd_easy::OutputFormat::Json,
+            OutputFormat::None => mpd_easy::OutputFormat::None,
         }
     }
 }
