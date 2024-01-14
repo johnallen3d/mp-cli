@@ -50,6 +50,7 @@ pub struct Status {
     pub random: OnOff,
     pub single: OnOff,
     pub consume: OnOff,
+    pub file_path: Option<String>,
 }
 
 impl fmt::Display for Status {
@@ -96,6 +97,7 @@ mod tests {
             random: OnOff::On,
             single: OnOff::Off,
             consume: OnOff::Off,
+            file_path: Some("path/to/file".to_string()),
         };
 
         let display_output = format!("{status}");

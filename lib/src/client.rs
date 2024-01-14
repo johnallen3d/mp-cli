@@ -945,7 +945,11 @@ impl Client {
             Some(song) => song.pos,
             None => 0,
         };
+
         let time = crate::time::Track::from(status.time);
+
+        let file_path =
+            self.client.currentsong()?.map(|song| song.file.clone());
 
         Ok(Status {
             volume,
@@ -961,6 +965,7 @@ impl Client {
             random: OnOff::from(status.random),
             single: OnOff::from(status.single),
             consume: OnOff::from(status.consume),
+            file_path,
         })
     }
 
