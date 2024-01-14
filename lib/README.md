@@ -6,9 +6,9 @@ An MPD client library that wraps the [mpd](https://crates.io/crates/mpd) crate p
 
 This was created initially for fun and practice writing Rust. The library code here was written in support of [`mp-cli`](https://github.com/johnallen3d/mp-cli).
 
-### SketcyBar
+### SketchyBar
 
-Recently I've been playing around with the Rust nightly feature [`cargo-script`](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#script) in conjunction with [SketchBar](https://github.com/FelixKratz/SketchyBar). I wanted to see if I could write a SketchyBar plugin that displays current MPD status entirely in Rust. Combining this library, my [Rust SketchyBar helper](https://github.com/johnallen3d/sketchybar-rs) and `cargo-script` I was able to do just that.
+Recently I've been playing around with the Rust nightly feature [`cargo-script`](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#script) in conjunction with [SketchyBar](https://github.com/FelixKratz/SketchyBar). I wanted to see if I could write a SketchyBar plugin that displays current MPD status entirely in Rust. Combining this library, my [Rust SketchyBar helper](https://github.com/johnallen3d/sketchybar-rs) and `cargo-script` I was able to do just that.
 
 ![sketchybar-mpd-example](./examples/sketchybar-mpd.png)
 
