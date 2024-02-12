@@ -10,7 +10,7 @@ repository.workspace = true
 autoexamples = false
 
 [dependencies]
-chrono = { version = "0.4.33", features = [] }
+chrono = { version = "0.4.34", features = [] }
 eyre = "0.6.12"
 mpd = { version = "0.1.0", features = ["serde"] }
 serde = { workspace = true }
