@@ -14,7 +14,7 @@ chrono = { version = "0.4.38", features = [] }
 eyre = "0.6.12"
 mpd = { version = "0.1.0", features = ["serde"] }
 serde = { workspace = true }
-serde_json = "1.0.116"
+serde_json = "1.0.117"
 
 [dev-dependencies]
 tempdir = "0.3.7"
