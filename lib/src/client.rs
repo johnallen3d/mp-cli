@@ -786,9 +786,14 @@ impl Client {
         Ok(None)
     }
 
-    pub fn list(&mut self, tag: &str) -> eyre::Result<Option<String>> {
+    pub fn list(
+        &mut self,
+        tag: &str,
+        queries: &Option<Vec<(&str, &str)>>,
+    ) -> eyre::Result<Option<String>> {
         let term = mpd::Term::Tag(tag.into());
         let query = mpd::Query::new();
+        dbg!(&queries);
 
         let results = self.client.list(&term, &query)?;
         let files = Listing::from(results);
