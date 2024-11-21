@@ -73,7 +73,13 @@ fn main() {
         Some(Commands::FindAdd { tag, query }) => {
             mpd.find_add(tag.to_str(), &query)
         }
-        Some(Commands::List { tag }) => mpd.list(tag.to_str()),
+        Some(Commands::List { tag, queries }) => {
+            let queries: Option<Vec<(&str, &str)>> = queries
+                .iter()
+                .map(|q| Some((q.tag.to_str(), q.query.as_str())))
+                .collect();
+            mpd.list(tag.to_str(), &queries)
+        }
         Some(Commands::Consume { state }) => mpd.consume(OnOff::to(&state)),
         Some(Commands::Crossfade { seconds }) => mpd.crossfade(seconds),
 
